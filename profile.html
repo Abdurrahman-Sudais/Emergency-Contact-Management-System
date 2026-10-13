@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InCase</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <nav class="topnav">
+        <a href="home.html" class="brand"><span class="dot"></span>InCase</a>
+        <div class="links">
+            <a href="home.html">Home</a>
+            <a href="contacts.html">Contacts</a>
+            <a href="profile.html" class="active">Profile</a>
+            <a href="security.html">Security</a>
+            <a href="admin.html">Admin</a>
+        </div>
+        <div class="user"><span class="avatar">AB</span> Amina Bello <a href="login.html">Log out</a></div>
+    </nav>
+
+    <main>
+        <div class="profile-head">
+            <span class="avatar big">AB</span>
+            <div>
+                <h1>Amina Bello</h1>
+                <span class="muted">User . joined October 2026</span>
+            </div>
+        </div>
+
+        <!-- Details -->
+        <section class="section">
+            <div>
+                <h2>Details</h2>
+                <p>Used to sign in and to introduce you to your contacts.</p>
+            </div>
+            <form action="profile.html">
+                <div class="two-fields">
+                    <div class="field"><label for="p-name">Full name</label><input id="p-name" value="Amina Bello"></div>
+                    <div class="field"><label for="p-phone">Phone</label><input id="p-phone" value="+234 801 555 0100"></div>
+                </div>
+                <div class="field"><label for="p-email">Email</label><input id="p-email" type="email" value="aminabello@gmail.com"></div>
+                <button class="btn btn-dark" type="submit">Save changes</button>
+            </form>
+        </section>
+
+        <!-- Medical notes -->
+        <div>
+            <h2>Medical notes</h2>
+            <p>What a responder should know. Encrypted and shown to primary contacts only.</p>
+        </div>
+        <form action="profile.html">
+            <div class="two-fields">
+                <div class="field">
+                    <label for="blood">Blood group</label>
+                    <select id="blood">
+                        <option>O positive</option><option>O negative</option>
+                        <option>A positive</option><option>A negative</option>
+                        <option>B positive</option><option>B negative</option>
+                        <option>AB positive</option><option>AB negative</option>
+                    </select>
+                </div>
+                <div class="field"><label for="allergies">Allergies</label><input id="allergies" placeholder="e.g. penicillin"></div>
+            </div>
+            <button class="btn btn-dark" type="submit">Save notes</button>
+        </form>
+
+        <!-- Password -->
+        <section class="section">
+            <div>
+                <h2>Password</h2>
+                <p>Use at least 10 characters.</p>
+            </div>
+            <form action="profile.html">
+                <div class="two-fields">
+                    <div class="field"><label for="old-pw">Current password</label><input id="old-pw" type="password"></div>
+                    <div class="field"><label for="new-pw">New password</label><input id="new-pw" type="password" minlength="10"></div>
+                </div>
+                <button class="btn btn-dark" type="submit">Update password</button>
+            </form>
+        </section>
+
+        <!-- Delete account -->
+        <section>
+            <div>
+                <h2>Delete account</h2>
+                <p>Removes your profile and every contact for good.</p>
+            </div>
+            <div>
+                <button class="btn btn-danger" type="button">Delete my account</button>
+                <p>You will confirm with your password first.</p>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

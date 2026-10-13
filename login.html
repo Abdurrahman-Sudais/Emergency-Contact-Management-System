@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InCase</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body class="split">
+    <!-- Left dark panel (hidden on phones) -->
+    <aside class="side dark">
+        <a href="index.html" class="brand"><span class="dot"></span>InCase</a>
+        <div class="middle">
+        <p class="big-num">01</p>
+        <h2>Who do you call first?</h2>
+        <p>Keep your emergency contacts in the order you want, one tap away.</p>
+    </div>
+    <span class="tag">ENCRYPTED / PRIVATE</span>
+    </aside>
+
+    <main class="form-side">
+        <form class="form" action="home.html">
+            <h1>Welcome back</h1>
+            <p class="muted">New here? <a href="signup.html"><b>Create an account</b></a></p>
+
+            <!-- Error state -->
+            <div class="error-box error" hidden>
+                <img src="images/triangle-alert.png" alt=""> Error: email or password is wrong. Try again.
+            </div>
+
+            <div class="field">
+                <label for="email">Email</label>
+                <input id="email" type="email" value="amina@gmail.com">
+            </div>
+
+            <div class="field">
+                <label for="password">Password</label>
+                <div class="row">
+                    <input id="password" type="password" required>
+                    <button type="button" class="btn" id="toggle"><img src="images/eye.png" alt=""> Show</button>
+                </div>
+            </div>
+
+            <div class="row" style="margin-bottom: 20px; justify-content: space-between;">
+                <label><input type="checkbox" checked> Keep me signed in</label>
+                <a href="#" style="text-align: right"><b>Forgot password?</b></a>
+            </div>
+
+            <button type="submit" class="btn btn-orange btn-wide">Log in</button>
+            <p class="muted" style="text-align: center; font-size: 13px;">Five failed attempts lock the account for 15 minutes.</p>
+        </form>
+    </main>
+    <script src="show.js"></script>
+</body>
+</html>

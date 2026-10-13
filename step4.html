@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InCase</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="screen light">
+        <div class="topbar">
+            <a href="step3.html" class="back"><img src="images/arrow-left.png" alt=""></a>
+            <span class="step-label">STEP 4 OF 4</span>
+        </div>
+
+        <h2>Who should we call first?</h2>
+        <p>One person is enough. You can add more later.</p>
+
+        <form action="home.html" class="fields">
+            <label class="lbl" for="name">Name</label>
+            <input class="input" id="name" type="text" placeholder="Tunde Bello" required>
+
+            <label class="lbl" for="phone">Phone number</label>
+            <div class="phone-row">
+                <select class="input" aria-label="Country code">
+                <option>+234</option><option>+233</option><option>+44</option><option>+1</option>
+                </select>   
+                <input class="input" id="phone" type="tel" placeholder="802 555 0142" required>
+            </div>  
+
+            <span class="lbl">Who are they to you?</span>
+            <div class="chip-group">
+                <label class="chip"><input type="radio" name="relation" value="family" checked><span>Family</span></label>
+                <label class="chip"><input type="radio" name="relation" value="friend"><span>Friend</span></label>
+                <label class="chip"><input type="radio" name="relation" value="doctor"><span>Doctor</span></label>
+                <label class="chip"><input type="radio" name="relation" value="neighbour"><span>Neighbour</span></label>
+            </div>
+
+            <div class="spacer">
+                <button type="submit" class="next">Save and finish</button>
+                <a href="home.html" class="later">I'll do this later</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

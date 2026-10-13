@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InCase</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <nav class="topnav">
+        <a href="home.html" class="brand"><span class="dot"></span>InCase</a>
+        <div class="links">
+            <a href="home.html">Home</a>
+            <a href="contacts.html" class="active">Contacts</a>
+            <a href="profile.html">Profile</a>
+            <a href="security.html">Security</a>
+            <a href="admin.html">Admin</a>
+        </div>
+        <div class="user"><span class="avatar">AB</span> Amina Bello <a href="login.html">Log out</a></div>
+    </nav>
+
+    <main class="container">
+        <div class="page-head">
+            <div>
+                <p class="eyebrow">12 people</p>
+                <h1>Contacts</h1>
+            </div>
+        <button class="btn btn-dark" id="open-drawer"><img src="images/plus.png" alt="">Add Contact</button>
+        </div>
+
+        <div class="search">
+            <img src="images/search.png" alt="">
+            <input type="search" placeholder="Search name or phone">
+        </div>
+
+        <div class="filters">
+            <button class="filter active">All 12</button>
+            <button class="filter">Family 5</button>
+            <button class="filter">Medical 2</button>
+            <button class="filter">Work 3</button>
+            <button class="filter">Needs review 3</button>
+        </div>
+
+        <div class="list">
+            <div class="list-row"><span class="num">01</span><span class="avatar">TB</span><div><b>Tunde Bello</b><small>Brother · +234 802 555 0142</small></div></div>
+            <div class="list-row"><span class="num">02</span><span class="avatar">KA</span><div><b>Dr. Kemi Adeyemi</b><small>Doctor · +234 802 555 0142</small></div></div>
+            <div class="list-row"><span class="num">03</span><span class="avatar">FO</span><div><b>Funke Oladipo</b><small>Neighbour · +234 802 555 0142</small></div></div>
+            <div class="list-row"><span class="num">04</span><span class="avatar">MI</span><div><b>Mrs. Ibrahim</b><small>Aunt · +234 802 555 0142</small></div></div>
+            <div class="list-row"><span class="num">05</span><span class="avatar">CE</span><div><b>Chidi Eze</b><small>Colleague · +234 802 555 0142</small></div></div>
+        </div>
+    </main>
+    <!-- Contact drawer -->
+    <aside class="drawer" id="drawer">
+        <div class="drawer-head">
+            <h2>Add contact</h2>
+            <button class="icon-btn close-drawer"><img src="images/x.png" alt=""></button>
+        </div>
+
+        <form action="contacts.html">
+            <div class="field">
+                <label for="c-name">Name</label>
+                <input type="text" id="c-name" placeholder="John Mike" required>
+            </div>
+
+            <div class="field">
+                <label for="c-phone">Phone</label>
+                <input type="text" id="c-phone" placeholder="+234 8145237643" required>
+                <!-- error -->
+                <div class="error" hidden><img src="images/triangle-alert.png" alt=""> Error: needs 10 digits after +234. Add 4 more</div>
+            </div>
+
+            <div class="field">
+                <label>Relationship</label>
+                <div class="chip-group">
+                    <label class="chip"><input type="radio" name="rel" checked><span>Family</span></label>
+                    <label class="chip"><input type="radio" name="rel"><span>Friend</span></label>
+                    <label class="chip"><input type="radio" name="rel"><span>Doctor</span></label>
+                    <label class="chip"><input type="radio" name="rel"><span>Neighbour</span></label>
+                    <label class="chip"><input type="radio" name="rel"><span>Work</span></label>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="c-note">Note for responders</label>
+                <textarea name="" id="c-name" cols="" rows="3" placeholder="Optional"></textarea>
+            </div>
+
+            <div class="drawer-actions">
+                <button type="submit" class="btn btn-dark btn-wide">Save contact</button>
+                <button type="button" class="btn close-drawer">Cancel</button>
+            </div>
+        </form>
+    </aside>
+    <script src="script.js"></script>
+</body>
+</html>

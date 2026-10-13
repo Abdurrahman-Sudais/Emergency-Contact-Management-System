@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InCase</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <nav class="topnav">
+        <a href="home.html" class="brand"><span class="dot"></span>InCase</a>
+        <div class="links">
+            <a href="home.html">Home</a>
+            <a href="contacts.html">Contacts</a>
+            <a href="profile.html">Profile</a>
+            <a href="security.html">Security</a>
+            <a href="admin.html" class="active">Admin</a>
+        </div>
+        <div class="user"><span class="avatar">SO</span> Samad Oyewole <a href="login.html">Log out</a></div>
+    </nav>
+
+    <main class="container">
+        <p class="eyebrow">Admin only</p>
+        <h1>Accounts</h1>
+
+        <div class="stats">
+            <div class="card stat"><span class="muted">Registered users</span><b>48</b></div>
+            <div class="card stat"><span class="muted">Active this week</span><b>31</b></div>
+            <div class="card stat alert"><span class="muted">Locked accounts</span><b>2</b></div>
+        </div>
+
+        <div class="admin-grid">
+            <div>
+                <div class="card table-card">
+                    <table>
+                        <thead><tr><th>USER</th><th>ROLE</th><th>STATUS</th><th>LAST IN</th><th></th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td><b>Amina Bello</b><br><span class="muted">amina@gmail.com</span></td>
+                                <td><select><option>User</option><option>Admin</option></select></td>
+                                <td><span class="badge green"><img src="images/check.png" alt=""> Active</span></td>
+                                <td class="muted">Today</td>
+                                <td><button class="btn btn-small">Suspend</button></td>
+                            </tr>
+                            <tr>
+                                <td><b>Tunde Bello</b><br><span class="muted">tunde@gmail.com</span></td>
+                                <td><select><option>User</option><option>Admin</option></select></td>
+                                <td><span class="badge green"><img src="images/check.png" alt=""> Active</span></td>
+                                <td class="muted">Yesterday</td>
+                                <td><button class="btn btn-small">Suspend</button></td>
+                            </tr>
+                            <tr>
+                                <td><b>Funke Oladipo</b><br><span class="muted">funke@gmail.com</span></td>
+                                <td><select><option>User</option><option>Admin</option></select></td>
+                                <td><span class="badge green"><img src="images/b_lock.png" alt=""> Active</span></td>
+                                <td class="muted">3 days ago</td>
+                                <td><button class="btn btn-small">Unlock</button></td>
+                            </tr>
+                            <tr>
+                                <td><b>Chidi Eze</b><br><span class="muted">chidi@gmail.com</span></td>
+                                <td><select><option>User</option><option>Admin</option></select></td>
+                                <td><span class="badge green"><img src="images/x.png" alt=""> Active</span></td>
+                                <td class="muted">2 weeks ago</td>
+                                <td><button class="btn btn-small">Reinstate</button></td>
+                            </tr>
+                          </tbody>
+                    </table>
+                </div>
+                <p class="muted" style="font-size: 14px">Role changes apply at the person's next sign-in.</p>
+            </div>
+
+            <aside class="card">
+                <h2>Audit log</h2>
+                <ul class="log">
+                    <li><b>Role changed</b> . Tunde Bello<small>TODAY</small></li>
+                    <li><b>Account locked</b> . Funke Oladipo<small>8 OCT</small></li>
+                    <li><b>Access denied</b> . Amina Bello<small>7 OCT</small></li>
+                </ul>
+            </aside>
+        </div>
+    </main>
+</body>
+</html>

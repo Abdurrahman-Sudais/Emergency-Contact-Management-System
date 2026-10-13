@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InCase</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body class="split">
+    <!-- Left orange panel (hidden on phones) -->
+    <aside class="side orange">
+        <a href="index.html" class="brand"><span class="dot"></span>InCase</a>
+        <div class="middle">
+            <h2>Set up in two minutes.</h2>
+            <ol class="steps">
+                <li>1&nbsp; Create your account</li>
+                <li>2&nbsp; A quick tour</li>
+                <li>3&nbsp; Add your first contact</li>
+            </ol>
+        </div>
+    </aside>
+    <main class="form-side">
+        <form class="form" action="step1.html"> 
+            <h1>Create account</h1>
+            <p class="muted">Already registered? <a href="login.html"><b>Log in</b></a></p>
+
+            <div class="field">
+                <label for="name">Full name</label>
+                <input id="name" type="text" placeholder="Amina Bello" required>
+            </div>
+
+            <div class="field">
+                <label for="password">Password</label>
+                <input id="email" type="email" placeholder="amina@gmail.com" required>
+                <!-- Error state -->
+                <div class="error" hidden><img src="images/triangle-alert.png" alt="">Error: add the part after @, like amina@gmail.com</div>
+            </div>
+
+            <div class="field">
+                <label for="password">Password</label>
+                <input id="password" type="password" required>
+                <div class="check ok"><img src="images/check.png" alt=""> 10 or more characters</div>
+                <div class="check"><img src="images/x.png" alt=""> One symbol, like ! or #</div>
+            </div>
+
+            <button type="submit" class="btn btn-dark btn-wide">Continue <img src="images/arrow-right.png" alt=""></button>
+        </form>
+    </main>
+    
+
+</body>
+</html>

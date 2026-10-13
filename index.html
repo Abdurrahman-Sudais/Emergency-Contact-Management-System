@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <a href="signup.html" class="screen dark">
+
+        <svg class="logo" width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="40" fill="#ff4d00"/>
+          <circle class="dot" cx="40" cy="40" r="14" fill="#111"/>
+        </svg>
+    
+        <h1 class="fade-up d1">InCase</h1>
+        <p class="fade-up d2">Who do you call first?</p>
+
+        <!-- Bottom thin line and tap to continue -->
+        <div class="splash-bottom fade-in d3">
+            <div class="progress"><span></span></div>
+            <small class="fade-in d3">Tap to continue</small>
+        </div>
+        
+    </a>
+    
+      <script>
+        // automatically go to signup.html after 5 seconds.
+        setTimeout(() => location.href = "signup.html", 5000);
+      </script>
+    
+</body>
+</html>

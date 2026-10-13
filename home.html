@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InCase</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body class="has-tabber">
+    <nav class="topnav">
+        <a href="home.html" class="brand"><span class="dot"></span>InCase</a>
+        <div class="links">
+            <a href="home.html" class="active">Home</a>
+            <a href="contacts.html">Contacts</a>
+            <a href="profile.html">Profile</a>
+            <a href="security.html">Security</a>
+            <a href="admin.html">Admin</a>
+        </div>
+
+        <div class="user">
+            <span class="avatar">AB</span> Amina Bello
+            <a href="login.html">Log out</a>
+        </div>
+    </nav> 
+
+    <!-- Heading: desktop version -->
+    <main class="container">
+        <div class="desk-only page-head">
+            <div>
+                <p class="eyebrow">Sunday 11 October</p>
+                <h1>Who do you call first?</h1>
+            </div>
+
+            <a href="contacts.html" class="btn btn-dark"><img src="images/plus.png" alt="">Add a contact</a>
+        </div>
+        
+
+        <!-- Heading: mobile version -->
+        <div class="mobile-only">
+            <div class="page-head">
+                <div>
+                    <p class="eyebrow">Sunday 11 October</p>
+                    <h1>Hi, Amina</h1>
+                </div>
+                <a href="profile.html" class="avatar big">AB</a>
+            </div>
+        </div>
+
+        <div class="dash-grid">
+            <!-- Contact 1 -->
+            <section class="card hero-card">
+                <span class="badge green"><i data-lucide="check"></i> Verified</span>
+                <p class="hero-num">01</p>
+                <h2 style="font-size: 32px;">Tunde Bello</h2>
+                <p class="muted mono">Brother +234 802 555 0142</p>
+                <!-- tel: opens the phone's dialer -->
+                <a href="tel:+2348025550142" class="btn btn-orange"><i data-lucide="phone"></i> Call Tunde</a>
+            </section>
+    
+            <!-- Contacts 2 and 3 -->
+            <div class="side-list">
+                <div class="card contact-row">
+                    <span class="num">02</span>
+                    <div class="who"><b>Dr. Kemi Adeyemi</b><span class="muted">Family doctor</span></div>
+
+                    <a href="tel:+2348035550177" class="btn btn-small"><img src="images/phone.png" alt=""> Call</a>
+                </div>
+                <div class="card contact-row">
+                    <span class="num">03</span>
+                    <div class="who"><b>Funke Oladipo</b><span class="muted">Neighbour</span></div>
+
+                    <a href="tel:+2348055550119" class="btn btn-small"><img src="images/phone.png" alt=""> Call</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Desktop only: readiness + activity -->
+        <div class="two-col desk-only">
+            <section class="card">
+                <h2>Readiness</h2>
+                <p class="muted">3 of 5 done</p>
+                <ul class="checklist">
+                    <li><span class="tick done"><i data-lucide="check"></i></span> Add three contacts</li>
+                    <li><span class="tick done"><i data-lucide="check"></i></span> Set the call order</li>
+                    <li><span class="tick"></span> Add allergies to your card</li>
+                    <li><span class="tick"></span> Verify Funke's number</li>
+                    <li><span class="tick done"><i data-lucide="check"></i></span> Review your privacy</li>
+                </ul>
+            </section>
+            <section class="card">
+                <h2>Recent activity</h2>
+                <ul class="activity">
+                    <li><time>Today</time> Order changed: Dr. Kemi moved to 02</li>
+                    <li><time>Yesterday</time> Tunde Bello verified</li>
+                    <li><time>8 Oct</time> Signed in from Safari on iPhone</li>
+                    <li><time>2 Oct</time> Funke Oladipo added</li>
+                </ul>
+            </section>
+        </div>
+    
+        <!-- Mobile only -->
+        <p class="muted mobile-only">2 things left to finish your setup.</p>
+        </main>
+    
+        <!-- Bottom tab bar (phones only) -->
+        <nav class="tabbar">
+            <a href="home.html" class="active"><i data-lucide="house"></i>Home</a>
+            <a href="contacts.html"><i data-lucide="users"></i>Contacts</a>
+            <a href="profile.html"><i data-lucide="user"></i>Profile</a>
+            <a href="security.html"><i data-lucide="shield-check"></i>Security</a>
+        </nav>
+    </main>
+</body>
+</html>

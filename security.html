@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InCase</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <nav class="topnav">
+        <a href="home.html" class="brand"><span class="dot"></span>InCase</a>
+        <div class="links">
+            <a href="home.html">Home</a>
+            <a href="contacts.html">Contacts</a>
+            <a href="profile.html">Profile</a>
+            <a href="security.html" class="active">Security</a>
+            <a href="admin.html">Admin</a>
+        </div>
+        <div class="user"><span class="avatar">AB</span> Amina Bello <a href="login.html">Log out</a></div>
+    </nav>
+      
+    <main class="container">
+        <p class="eyebrow">10 safeguards</p>
+        <h1>How InCase protects you</h1>
+        <p class="muted">Each safeguard maps to a test in the project's security testing plan.</p>
+
+        <ol class="safeguards">
+            <li><span class="n">01</span><b>Authentication</b><span>Email and password sign-in. Logout ends the session on the server. Five failures lock the account for 15 minutes.</span></li>
+            <li><span class="n">02</span><b>Password hashing</b><span>Only a salted Argon2 hash is stored, never the password.</span></li>
+            <li><span class="n">03</span><b>Role-based access</b><span>Admin and User. The role is read from the server session on every request.</span></li>
+            <li><span class="n">04</span><b>Input Validation</b><span>Checked in the browser for speed and again on the server, which is the check that counts.</span></li>
+            <li><span class="n">05</span><b>SQL injection</b><span>Every query uses parameters, so typed text is data, never SQL.</span></li>
+            <li><span class="n">06</span><b>Cross-site scripiting</b><span>Output is escaped and a Content Security Policy blocks unknown scripts.</span></li>
+            <li><span class="n">07</span><b>Session management</b><span>Secure, HttpOnly cookies. Sessions end after 15 minutes idle and get a fresh ID at sign-in.</span></li>
+            <li><span class="n">08</span><b>Access-control checks</b><span>Each request confirms the contact belongs to the signed-in user.</span></li>
+            <li><span class="n">09</span><b>Sensitive information</b><span>Medical notes encrypted at rest. Secrets in environment variables. Errors never show personal data.</span></li>
+            <li><span class="n">10</span><b>HTTPS and headers</b><span>All traffic forced onto HTTPS with the hardening headers listed below.</span></li>
+        </ol>
+
+        <div class="two-col">
+            <section>
+                <h2>Who can do what</h2>
+                <table>
+                    <thead><tr><th>ACTION</th><th>USER</th><th>ADMIN</th></tr></thead>
+                    <tbody>
+                        <tr><td>Edit own contacts</td><td>Yes</td><td>Yes</td></tr>
+                        <tr><td>Read others' contacts</td><td>No</td><td>No</td></tr>
+                        <tr><td>Open admin panel</td><td>No</td><td>Yes</td></tr>
+                        <tr><td>Change roles</td><td>No</td><td>Yes</td></tr>
+                        <tr><td>Read audit log</td><td>No</td><td>Yes</td></tr>
+                    </tbody>
+                </table>
+            </section>
+            <section>
+                <h2>Headers on every page</h2>
+                <pre>
+                    Strict-Transport-Security: max-age=31536000
+                    Content-Security-Policy: default-src 'self'
+                    X-Content-Type-Options: nonsniff
+                    X-frame-Options: DENY
+                    set-Cookie: sid=...; Secure; HttpOnly; SameSite=Lax
+                </pre>
+            </section>
+        </div>
+    </main>
+</body>
+</html>
