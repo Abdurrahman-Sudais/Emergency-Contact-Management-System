@@ -5,7 +5,6 @@ body {
   margin: 0;
   font-family: system-ui, sans-serif;
 }
-/* Layout */
 .screen {
   display: flex;
   flex-direction: column;
@@ -27,7 +26,6 @@ body {
   color: #111;
 }
 
-/* Header: dots and skip */
 header {
   display: flex;
   justify-content: space-between;
@@ -46,14 +44,13 @@ header {
 .dots span.on {
   width: 22px;
   background: #111;
-} /* the active dot is wider */
+}
 .skip {
   color: #666;
   text-decoration: none;
   font-size: 14px;
 }
 
-/* Ranked contact cards*/
 .cards,
 .lock {
   margin: auto 0;
@@ -85,7 +82,6 @@ small {
   color: #888;
 }
 
-/* Lock icon */
 .lock {
   width: 72px;
   height: 72px;
@@ -97,7 +93,6 @@ small {
   align-self: center;
 }
 
-/* Text and Next button */
 h2 {
   font-size: 28px;
   margin: 0 0 8px;
@@ -119,12 +114,11 @@ p {
   text-decoration: none;
   margin-top: 16px;
 }
-/* Splash animation */
 .logo {
   animation: pop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-} /* circle pops in */
+}
 .dot {
-  transform-origin: 40px 40px; /* pulse from its own center */
+  transform-origin: 40px 40px;
   animation: pulse 1.8s ease-in-out 0.8s infinite;
 }
 .fade-up {
@@ -137,13 +131,13 @@ p {
 }
 .d1 {
   animation-delay: 0.5s;
-} /* title */
+}
 .d2 {
   animation-delay: 0.8s;
-} /* tagline */
+}
 .d3 {
   animation-delay: 1.3s;
-} /* tap to continue */
+}
 
 @keyframes pop {
   from {
@@ -183,7 +177,6 @@ p {
   }
 }
 
-/* Step 3: emergency card */
 .emergency {
   background: #faf8f5;
   border: 1px solid #ddd;
@@ -236,7 +229,6 @@ p {
   height: 18px;
 }
 
-/* Step 4: form */
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -304,7 +296,7 @@ form.fields {
   background: #111;
   color: #fff;
   border-color: #111;
-} /* selected chip turns black */
+}
 .spacer {
   margin-top: auto;
 }
@@ -323,10 +315,9 @@ button.next {
   margin-top: 16px;
 }
 
-/* Splash layout (matches the PDF) */
 .splash-center {
   margin: auto 0;
-} /* keeps the logo block centered */
+}
 .splash-center h1 {
   margin: 24px 0 8px;
   font-size: 40px;
@@ -341,7 +332,6 @@ button.next {
   font-size: 15px;
 }
 
-/* Thin progress bar that fills over 3.5s, like the auto-advance timer */
 .progress {
   width: 100%;
   height: 3px;
@@ -360,5 +350,248 @@ button.next {
 @keyframes fill {
   to {
     width: 100%;
+  }
+}
+
+body {
+  background: #eeeae4;
+}
+.screen {
+  max-width: 480px;
+  padding: 28px 24px 32px;
+}
+
+.screen.dark {
+  max-width: none;
+}
+.dark .logo {
+  width: 96px;
+  height: 96px;
+  margin-top: auto;
+}
+.dark h1 {
+  font-size: 56px;
+  letter-spacing: -0.04em;
+  margin: 28px 0 8px;
+}
+.dark p {
+  font-size: 19px;
+  margin: 0;
+}
+.splash-bottom {
+  margin-top: auto;
+  max-width: 420px;
+}
+.splash-bottom small {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+h2 {
+  font-size: 36px;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+}
+.light p {
+  font-size: 17px;
+  line-height: 1.5;
+  margin: 0;
+}
+.skip {
+  font-size: 16px;
+}
+.dots span {
+  width: 7px;
+  height: 7px;
+}
+.dots span.on {
+  width: 28px;
+}
+.next {
+  align-items: center;
+  padding: 20px;
+  font-size: 17px;
+  font-weight: 700;
+  margin-top: 28px;
+}
+.next img {
+  width: 20px;
+  height: 20px;
+  filter: invert(1);
+}
+
+.cards {
+  padding: 32px 0;
+}
+.cards .card {
+  gap: 16px;
+  padding: 16px 20px;
+  border: 1px solid #ddd;
+  border-radius: 18px;
+  margin-bottom: 12px;
+}
+.cards .card:nth-child(2) {
+  margin-left: 20px;
+}
+.cards .card:nth-child(3) {
+  margin-left: 40px;
+}
+.cards .card div {
+  font-weight: 700;
+  font-size: 17px;
+}
+.cards small {
+  font-weight: 400;
+  font-size: 15px;
+  color: #666;
+}
+.cards .num {
+  width: 48px;
+  height: 48px;
+  font-size: 20px;
+  flex: none;
+}
+
+.lock {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  margin: 130px auto;
+}
+.lock img {
+  width: 40px;
+  height: 40px;
+}
+.lock::before,
+.lock::after {
+  content: "";
+  position: absolute;
+  border: 1px solid #a49e95;
+  border-radius: 50%;
+}
+.lock::before {
+  inset: -45px;
+}
+.lock::after {
+  inset: -95px;
+}
+.lock .tag {
+  position: absolute;
+  z-index: 1;
+  white-space: nowrap;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  background: #faf8f5;
+  border: 1px solid #ddd;
+}
+.lock .tag.only {
+  top: -78px;
+  left: 95px;
+}
+.lock .tag.enc {
+  bottom: -50px;
+  right: 80px;
+  color: #1f7a4d;
+  background: #e6f2ec;
+  border-color: #b9dcc9;
+}
+
+.emergency h3 {
+  font-size: 32px;
+  letter-spacing: -0.03em;
+}
+.call-btn {
+  font-size: 19px;
+}
+.call-btn img {
+  width: 22px;
+  height: 22px;
+}
+.pill img {
+  width: 16px;
+  height: 16px;
+}
+
+@media (min-width: 600px) {
+  .screen.light {
+    padding-top: 40px;
+  }
+}
+
+@media (min-width: 900px) {
+  .screen.tour {
+    max-width: 1160px;
+    padding: 40px 64px;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    grid-template-rows: auto 1fr auto auto auto 1fr;
+    column-gap: 96px;
+  }
+  .tour > header {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+  .tour > :nth-child(2) {
+    grid-column: 1;
+    grid-row: 2 / 7;
+    align-self: center;
+    justify-self: center;
+    width: 100%;
+    max-width: 460px;
+  }
+  .tour > .lock {
+    width: 140px;
+    height: 140px;
+    margin: 0;
+  }
+  .tour > h2 {
+    grid-column: 2;
+    grid-row: 3;
+    font-size: 54px;
+    margin-bottom: 20px;
+  }
+  .tour > p {
+    grid-column: 2;
+    grid-row: 4;
+    font-size: 20px;
+    max-width: 440px;
+  }
+  .tour > .next {
+    grid-column: 2;
+    grid-row: 5;
+    justify-self: start;
+    padding: 20px 44px;
+    margin-top: 36px;
+  }
+  .tour .cards .card {
+    padding: 22px 26px;
+  }
+
+  .screen.light:not(.tour) {
+    min-height: auto;
+    margin: 48px auto;
+    padding: 40px 44px;
+    max-width: 520px;
+    background: #faf8f5;
+    border: 1px solid #ddd;
+    border-radius: 28px;
+  }
+  .screen.light:not(.tour) .spacer {
+    margin-top: 32px;
+  }
+
+  .dark .logo {
+    width: 128px;
+    height: 128px;
+  }
+  .dark h1 {
+    font-size: 80px;
+  }
+  .dark p {
+    font-size: 22px;
   }
 }

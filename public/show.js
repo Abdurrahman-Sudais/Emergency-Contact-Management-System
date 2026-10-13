@@ -1,5 +1,3 @@
-// Login script
-
 const pw = document.getElementById("password");
 document.getElementById("toggle").addEventListener("click", () => {
   if (pw.type === "password") {

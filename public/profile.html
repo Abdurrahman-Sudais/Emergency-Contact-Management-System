@@ -7,7 +7,7 @@
     <title>InCase</title>
     <link rel="stylesheet" href="app.css">
 </head>
-<body>
+<body class="has-tabbar">
     <nav class="topnav">
         <a href="home.html" class="brand"><span class="dot"></span>InCase</a>
         <div class="links">
@@ -17,81 +17,114 @@
             <a href="security.html">Security</a>
             <a href="admin.html">Admin</a>
         </div>
-        <div class="user"><span class="avatar">AB</span> Amina Bello <a href="login.html">Log out</a></div>
+        <div class="user"><span class="avatar"></span> <span class="user-name"></span> <a href="login.html">Log out</a></div>
     </nav>
 
-    <main>
+    <main class="container narrow">
         <div class="profile-head">
-            <span class="avatar big">AB</span>
+            <span class="avatar big" id="profile-initials"></span>
             <div>
-                <h1>Amina Bello</h1>
-                <span class="muted">User . joined October 2026</span>
+                <h1 id="profile-name"></h1>
+                <span class="muted" id="profile-meta"></span>
             </div>
         </div>
 
-        <!-- Details -->
         <section class="section">
             <div>
                 <h2>Details</h2>
                 <p>Used to sign in and to introduce you to your contacts.</p>
             </div>
-            <form action="profile.html">
+            <form action="profile.html" id="details-form" novalidate>
                 <div class="two-fields">
-                    <div class="field"><label for="p-name">Full name</label><input id="p-name" value="Amina Bello"></div>
-                    <div class="field"><label for="p-phone">Phone</label><input id="p-phone" value="+234 801 555 0100"></div>
+                    <div class="field"><label for="p-name">Full name</label><input id="p-name" name="name" maxlength="80" autocomplete="name">
+                        <div class="error" data-error-for="p-name" hidden><img src="images/triangle-alert.png" alt=""><span></span></div></div>
+                    <div class="field"><label for="p-phone">Phone</label><input id="p-phone" name="phone" type="tel" maxlength="20" autocomplete="tel">
+                        <div class="error" data-error-for="p-phone" hidden><img src="images/triangle-alert.png" alt=""><span></span></div></div>
                 </div>
-                <div class="field"><label for="p-email">Email</label><input id="p-email" type="email" value="aminabello@gmail.com"></div>
+                <div class="field"><label for="p-email">Email</label><input id="p-email" name="email" type="email" maxlength="254" autocomplete="email">
+                    <div class="error" data-error-for="p-email" hidden><img src="images/triangle-alert.png" alt=""><span></span></div></div>
+                <div class="flash" data-message hidden><span></span></div>
                 <button class="btn btn-dark" type="submit">Save changes</button>
             </form>
         </section>
 
-        <!-- Medical notes -->
+        <section class="section">
         <div>
             <h2>Medical notes</h2>
             <p>What a responder should know. Encrypted and shown to primary contacts only.</p>
         </div>
-        <form action="profile.html">
+        <form action="profile.html" id="medical-form" novalidate>
             <div class="two-fields">
                 <div class="field">
                     <label for="blood">Blood group</label>
                     <select id="blood">
+                        <option value="">Not set</option>
                         <option>O positive</option><option>O negative</option>
                         <option>A positive</option><option>A negative</option>
                         <option>B positive</option><option>B negative</option>
                         <option>AB positive</option><option>AB negative</option>
                     </select>
                 </div>
-                <div class="field"><label for="allergies">Allergies</label><input id="allergies" placeholder="e.g. penicillin"></div>
+                <div class="field"><label for="allergies">Allergies</label><input id="allergies" placeholder="e.g. penicillin" maxlength="200">
+                    <div class="error" data-error-for="allergies" hidden><img src="images/triangle-alert.png" alt=""><span></span></div></div>
             </div>
+            <div class="flash" data-message hidden><span></span></div>
             <button class="btn btn-dark" type="submit">Save notes</button>
         </form>
+        </section>
 
-        <!-- Password -->
         <section class="section">
             <div>
                 <h2>Password</h2>
-                <p>Use at least 10 characters.</p>
+                <p>Use at least 10 characters, including one symbol. Changing it signs out your other devices.</p>
             </div>
-            <form action="profile.html">
+            <form action="profile.html" id="password-form" novalidate>
                 <div class="two-fields">
-                    <div class="field"><label for="old-pw">Current password</label><input id="old-pw" type="password"></div>
-                    <div class="field"><label for="new-pw">New password</label><input id="new-pw" type="password" minlength="10"></div>
+                    <div class="field"><label for="old-pw">Current password</label><input id="old-pw" type="password" autocomplete="current-password" maxlength="128">
+                        <div class="error" data-error-for="old-pw" hidden><img src="images/triangle-alert.png" alt=""><span></span></div></div>
+                    <div class="field"><label for="new-pw">New password</label><input id="new-pw" type="password" minlength="10" maxlength="128" autocomplete="new-password">
+                        <div class="error" data-error-for="new-pw" hidden><img src="images/triangle-alert.png" alt=""><span></span></div></div>
                 </div>
+                <div class="flash" data-message hidden><span></span></div>
                 <button class="btn btn-dark" type="submit">Update password</button>
             </form>
         </section>
 
-        <!-- Delete account -->
-        <section>
+        <section class="section mobile-only-grid">
+            <div>
+                <h2>Log out</h2>
+                <p>Ends your session on this device.</p>
+            </div>
+            <div><button class="btn" type="button" id="logout-btn">Log out</button></div>
+        </section>
+
+        <section class="section">
             <div>
                 <h2>Delete account</h2>
                 <p>Removes your profile and every contact for good.</p>
             </div>
             <div>
-                <button class="btn btn-danger" type="button">Delete my account</button>
+                <button class="btn btn-danger" type="button" id="delete-open">Delete my account</button>
                 <p>You will confirm with your password first.</p>
+                <form id="delete-form" hidden novalidate>
+                    <div class="field"><label for="del-pw">Your password</label><input id="del-pw" type="password" autocomplete="current-password" maxlength="128">
+                        <div class="error" data-error-for="del-pw" hidden><img src="images/triangle-alert.png" alt=""><span></span></div></div>
+                    <button class="btn btn-danger" type="submit">Delete everything for good</button>
+                </form>
             </div>
         </section>
     </main>
+    <nav class="tabbar">
+        <a href="home.html"><i data-lucide="house"></i>Home</a>
+        <a href="contacts.html"><i data-lucide="users"></i>Contacts</a>
+        <a href="profile.html" class="active"><i data-lucide="user"></i>Profile</a>
+        <a href="security.html"><i data-lucide="shield-check"></i>Security</a>
+        <a href="admin.html"><i data-lucide="lock"></i>Admin</a>
+    </nav>
+    <script src="js/lucide.min.js"></script>
+    <script src="js/validate.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/nav.js"></script>
+    <script src="js/profile.js"></script>
 </body>
 </html>

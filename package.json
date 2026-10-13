@@ -1,0 +1,22 @@
+{
+  "name": "incase",
+  "version": "1.0.0",
+  "description": "InCase - emergency contact management web application",
+  "private": true,
+  "main": "server.js",
+  "engines": {
+    "node": ">=24.7"
+  },
+  "scripts": {
+    "setup": "node scripts/setup.js",
+    "start": "node --env-file-if-exists=.env server.js",
+    "dev": "node --watch --env-file-if-exists=.env server.js",
+    "seed": "node --env-file-if-exists=.env scripts/seed.js",
+    "make-admin": "node --env-file-if-exists=.env scripts/make-admin.js",
+    "cert": "node scripts/make-cert.js",
+    "test": "node --test --test-reporter=spec \"tests/**/*.test.js\""
+  },
+  "dependencies": {
+    "express": "^5.3.0"
+  }
+}

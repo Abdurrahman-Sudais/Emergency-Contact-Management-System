@@ -1,0 +1,105 @@
+const crypto = require("node:crypto");
+const { openDatabase } = require("../src/db");
+const { createApp } = require("../src/app");
+const { hashPassword } = require("../src/security/passwords");
+
+async function startApp(options = {}) {
+  const db = openDatabase(":memory:");
+  const clock = { now: Date.UTC(2026, 9, 13, 12, 0, 0) };
+  const dataKey = crypto.randomBytes(32);
+  const app = createApp({ db, dataKey, now: () => clock.now, logErrors: false, ...options });
+  const server = await new Promise((resolve) => {
+    const s = app.listen(0, "127.0.0.1", () => resolve(s));
+  });
+  const base = `http://127.0.0.1:${server.address().port}`;
+
+  return {
+    db,
+    clock,
+    base,
+    close: () => new Promise((r) => server.close(r)),
+    advance(ms) {
+      clock.now += ms;
+    },
+    browser: () => new Browser(base),
+
+    async createUser({ name = "Test User", email, password = "Password!123", role = "user" }) {
+      const hash = await hashPassword(password);
+      const r = db.prepare(`INSERT INTO users (name, email, password_hash, role, created_at) VALUES (?, ?, ?, ?, ?)`)
+        .run(name, email, hash, role, clock.now);
+      return Number(r.lastInsertRowid);
+    },
+
+    async signedIn(email, password = "Password!123", opts = {}) {
+      await this.createUser({ email, password, ...opts });
+      const b = this.browser();
+      const r = await b.post("/api/login", { email, password });
+      if (r.status !== 200) throw new Error(`login failed: ${r.status} ${JSON.stringify(r.json)}`);
+      return b;
+    },
+  };
+}
+
+class Browser {
+  constructor(base) {
+    this.base = base;
+    this.cookies = {};
+    this.rawSetCookies = [];
+  }
+
+  cookieHeader() {
+    return Object.entries(this.cookies).map(([k, v]) => `${k}=${v}`).join("; ");
+  }
+
+  async request(method, path, { body, headers = {}, csrf = true, raw } = {}) {
+    if (method !== "GET" && csrf && !this.csrfToken) await this.refreshSession();
+    const h = { cookie: this.cookieHeader(), ...headers };
+    if (method !== "GET" && csrf) h["x-csrf-token"] ??= this.csrfToken;
+    let payload;
+    if (raw !== undefined) payload = raw;
+    else if (body !== undefined) {
+      h["content-type"] ??= "application/json";
+      payload = JSON.stringify(body);
+    }
+    const res = await fetch(this.base + path, { method, headers: h, body: payload, redirect: "manual" });
+    this.rawSetCookies = res.headers.getSetCookie();
+    for (const c of this.rawSetCookies) {
+      const [pair, ...attrs] = c.split(";");
+      const i = pair.indexOf("=");
+      const name = pair.slice(0, i).trim();
+      const value = pair.slice(i + 1).trim();
+      if (attrs.some((a) => /max-age=0/i.test(a))) delete this.cookies[name];
+      else this.cookies[name] = value;
+    }
+    const text = await res.text();
+    let json = null;
+    try {
+      json = JSON.parse(text);
+    } catch {}
+    if (this.rawSetCookies.some((c) => c.startsWith("sid="))) this.csrfToken = null;
+    return { status: res.status, headers: res.headers, text, json, location: res.headers.get("location") };
+  }
+
+  async refreshSession() {
+    const r = await this.request("GET", "/api/session");
+    this.csrfToken = r.json.csrfToken;
+    return r.json;
+  }
+
+  get(path) {
+    return this.request("GET", path);
+  }
+  post(path, body, opts) {
+    return this.request("POST", path, { body, ...opts });
+  }
+  put(path, body, opts) {
+    return this.request("PUT", path, { body, ...opts });
+  }
+  del(path, body, opts) {
+    return this.request("DELETE", path, { body, ...opts });
+  }
+}
+
+const contact = (over = {}) => ({ name: "Tunde Bello", phone: "+234 802 555 0142", relationship: "family", ...over });
+
+module.exports = { startApp, contact };

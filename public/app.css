@@ -22,7 +22,7 @@ body {
 }
 [hidden] {
   display: none !important;
-} /* hide error messages until needed */
+}
 a {
   color: inherit;
 }
@@ -55,13 +55,12 @@ h2 {
   margin: 0 0 8px;
 }
 
-/*Buttons*/
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 44px; /* easy to tap on phones */
+  min-height: 44px;
   padding: 12px 20px;
   border-radius: 999px;
   border: 1px solid var(--ink);
@@ -94,16 +93,14 @@ h2 {
   padding: 16px;
 }
 
-/* Image icons inside buttons (like images/plus.png) */
 .btn img {
   width: 18px;
   height: 18px;
 }
 .btn-dark img {
   filter: invert(1);
-} /* turns a black icon white on the dark button. Delete if plus.png is already white */
+}
 
-/* Top navigation */
 .topnav {
   display: flex;
   flex-wrap: wrap;
@@ -142,7 +139,7 @@ h2 {
 .links a.active {
   background: var(--ink);
   color: #fff;
-} /* the current page */
+}
 .user {
   margin-left: auto;
   display: flex;
@@ -173,7 +170,6 @@ h2 {
   font-size: 20px;
 }
 
-/* Page layout */
 .container {
   max-width: 1040px;
   margin: 0 auto;
@@ -198,7 +194,6 @@ h2 {
   padding: 24px;
 }
 
-/* Badges */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -229,7 +224,6 @@ h2 {
   border-color: var(--line);
 }
 
-/* Forms */
 .field {
   margin-bottom: 16px;
 }
@@ -248,7 +242,7 @@ h2 {
   border-radius: 12px;
   background: #fff;
   font: inherit;
-  font-size: 16px; /* 16px stops iPhone zoom on tap */
+  font-size: 16px;
 }
 .field input.invalid {
   border-color: var(--red);
@@ -315,7 +309,6 @@ h2 {
   border-color: var(--ink);
 }
 
-/* Login / signup split layout */
 .split {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -390,7 +383,6 @@ h2 {
   margin-bottom: 8px;
 }
 
-/* Home */
 .dash-grid {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
@@ -479,7 +471,6 @@ h2 {
   flex: none;
 }
 
-/* Contacts */
 .search {
   position: relative;
   margin-bottom: 16px;
@@ -494,17 +485,16 @@ h2 {
   font-size: 16px;
 }
 
-/* Search icon sits inside the box. Works for both <img> and Lucide icons */
 .search img,
 .search .lucide {
   position: absolute;
   left: 16px;
   top: 50%;
-  transform: translateY(-50%); /* centers it vertically */
+  transform: translateY(-50%);
   width: 18px;
   height: 18px;
   color: var(--muted);
-  pointer-events: none; /* clicks go through to the input */
+  pointer-events: none;
 }
 
 .filters {
@@ -566,11 +556,11 @@ h2 {
   overflow-y: auto;
   box-shadow: -10px 0 40px rgba(0, 0, 0, 0.12);
   transform: translateX(110%);
-  transition: transform 0.3s; /* hidden off-screen */
+  transition: transform 0.3s;
 }
 .drawer.open {
   transform: none;
-} /* slides in */
+}
 .drawer-head {
   display: flex;
   justify-content: space-between;
@@ -601,7 +591,6 @@ h2 {
   margin-top: 24px;
 }
 
-/* Profile */
 .profile-head {
   display: flex;
   align-items: center;
@@ -633,7 +622,6 @@ h2 {
   gap: 16px;
 }
 
-/* Security */
 .safeguards {
   list-style: none;
   margin: 24px 0 40px;
@@ -683,7 +671,6 @@ pre {
   margin: 0;
 }
 
-/* Admin */
 .stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -735,13 +722,11 @@ pre {
   margin-top: 4px;
 }
 
-/* Mobile responsive */
 .mobile-only,
 .tabbar {
   display: none;
 }
 
-/* Tablets and small laptops */
 @media (max-width: 800px) {
   .split {
     grid-template-columns: 1fr;
@@ -765,7 +750,6 @@ pre {
   }
 }
 
-/* Phones */
 @media (max-width: 700px) {
   .desk-only {
     display: none !important;
@@ -775,7 +759,7 @@ pre {
   }
   body.has-tabbar .topnav {
     display: none;
-  } /* home page uses the bottom tab bar instead */
+  }
 
   h1 {
     font-size: 30px;
@@ -787,7 +771,6 @@ pre {
     padding: 24px 16px;
   }
 
-  /* Top nav: logo and user on row 1, links scroll sideways on row 2 */
   .topnav {
     padding: 10px 16px;
   }
@@ -805,7 +788,6 @@ pre {
     font-size: 13px;
   }
 
-  /* Headings and cards */
   .page-head {
     flex-direction: column;
     align-items: flex-start;
@@ -847,7 +829,6 @@ pre {
     font-size: 12px;
   }
 
-  /* Wide things scroll instead of breaking the page */
   .table-card {
     overflow-x: auto;
   }
@@ -855,12 +836,10 @@ pre {
     min-width: 560px;
   }
 
-  /* Add contact drawer fills the screen */
   .drawer {
     width: 100%;
   }
 
-  /* Bottom tab bar (home page, phones only) */
   .tabbar {
     display: flex;
     position: fixed;
@@ -890,5 +869,165 @@ pre {
   .tabbar img {
     width: 24px;
     height: 24px;
+  }
+}
+
+.error img,
+.check img,
+.badge img,
+.tick img {
+  width: 16px;
+  height: 16px;
+}
+.badge img {
+  width: 13px;
+  height: 13px;
+}
+.tick.done img {
+  width: 13px;
+  height: 13px;
+  filter: invert(1);
+}
+.field textarea.invalid,
+.input.invalid {
+  border-color: var(--red);
+}
+
+.flash {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #e6f2ec;
+  border: 1px solid #b9dcc9;
+  color: var(--green);
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin: 0 0 16px;
+}
+
+.side .big-num {
+  color: var(--orange);
+}
+
+.remember {
+  margin-bottom: 20px;
+  justify-content: space-between;
+}
+.remember > * {
+  flex: 0 0 auto;
+}
+.hint {
+  text-align: center;
+  font-size: 13px;
+}
+
+.hero-name {
+  font-size: 32px;
+}
+.empty-card {
+  margin-bottom: 20px;
+}
+.empty-card .btn img {
+  width: 18px;
+  height: 18px;
+}
+.add-row {
+  border-style: dashed;
+  background: transparent;
+  text-decoration: none;
+}
+.add-row .who {
+  flex: 1;
+}
+.more-link {
+  font-weight: 700;
+  text-decoration: none;
+  padding: 4px 8px;
+}
+.checklist a {
+  font-weight: 600;
+}
+
+.list-row .who {
+  flex: 1;
+  min-width: 0;
+}
+.list-row .note {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+.row-actions {
+  display: flex;
+  gap: 6px;
+}
+.row-actions .icon-btn {
+  width: 38px;
+  height: 38px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.row-actions .lucide {
+  width: 17px;
+  height: 17px;
+}
+.icon-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.empty {
+  padding: 24px 4px;
+}
+.verify {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+.verify input {
+  width: 18px;
+  height: 18px;
+}
+
+.mobile-only-grid {
+  display: none;
+}
+#delete-form {
+  margin-top: 16px;
+  max-width: 360px;
+}
+
+.small {
+  font-size: 14px;
+}
+
+@media (max-width: 900px) {
+  .list-row {
+    flex-wrap: wrap;
+  }
+  .row-actions {
+    width: 100%;
+    padding-left: 64px;
+  }
+}
+
+@media (max-width: 700px) {
+  .user-name {
+    display: none;
+  }
+  .mobile-only-grid {
+    display: grid;
+  }
+  body.has-tabbar {
+    padding-bottom: 80px;
+  }
+  .list-row .avatar {
+    display: none;
+  }
+  .row-actions {
+    padding-left: 52px;
   }
 }

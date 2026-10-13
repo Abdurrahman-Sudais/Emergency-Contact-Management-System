@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="app.css">
 </head>
 <body class="split">
-    <!-- Left orange panel (hidden on phones) -->
     <aside class="side orange">
         <a href="index.html" class="brand"><span class="dot"></span>InCase</a>
         <div class="middle">
@@ -21,33 +20,36 @@
         </div>
     </aside>
     <main class="form-side">
-        <form class="form" action="step1.html"> 
+        <form class="form" action="step1.html" id="signup-form" novalidate>
             <h1>Create account</h1>
             <p class="muted">Already registered? <a href="login.html"><b>Log in</b></a></p>
 
             <div class="field">
                 <label for="name">Full name</label>
-                <input id="name" type="text" placeholder="Amina Bello" required>
+                <input id="name" name="name" type="text" placeholder="Amina Bello" autocomplete="name" maxlength="80" required>
+                <div class="error" data-error-for="name" hidden><img src="images/triangle-alert.png" alt=""><span></span></div>
+            </div>
+
+            <div class="field">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" placeholder="amina@gmail.com" autocomplete="email" maxlength="254" required>
+                <div class="error" data-error-for="email" hidden><img src="images/triangle-alert.png" alt=""><span>Error: add the part after @, like amina@gmail.com</span></div>
             </div>
 
             <div class="field">
                 <label for="password">Password</label>
-                <input id="email" type="email" placeholder="amina@gmail.com" required>
-                <!-- Error state -->
-                <div class="error" hidden><img src="images/triangle-alert.png" alt="">Error: add the part after @, like amina@gmail.com</div>
-            </div>
-
-            <div class="field">
-                <label for="password">Password</label>
-                <input id="password" type="password" required>
-                <div class="check ok"><img src="images/check.png" alt=""> 10 or more characters</div>
-                <div class="check"><img src="images/x.png" alt=""> One symbol, like ! or #</div>
+                <input id="password" name="password" type="password" autocomplete="new-password" maxlength="128" required>
+                <div class="check" data-check="length"><img src="images/x.png" alt=""> 10 or more characters</div>
+                <div class="check" data-check="symbol"><img src="images/x.png" alt=""> One symbol, like ! or #</div>
+                <div class="error" data-error-for="password" hidden><img src="images/triangle-alert.png" alt=""><span></span></div>
             </div>
 
             <button type="submit" class="btn btn-dark btn-wide">Continue <img src="images/arrow-right.png" alt=""></button>
         </form>
     </main>
-    
 
+    <script src="js/validate.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/signup.js"></script>
 </body>
 </html>

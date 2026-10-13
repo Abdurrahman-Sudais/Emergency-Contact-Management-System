@@ -1,0 +1,84 @@
+const path = require("node:path");
+const express = require("express");
+
+const { createStore } = require("./store");
+const { createCipher } = require("./security/encryption");
+const { createSessions } = require("./security/sessions");
+const { csrf } = require("./security/csrf");
+const { securityHeaders, noStore } = require("./security/headers");
+
+const PUBLIC_DIR = path.join(__dirname, "..", "public");
+
+const PRIVATE_PAGES = ["home", "contacts", "profile", "admin", "step4"];
+const GUEST_PAGES = ["login", "signup"];
+
+function createApp({ db, dataKey, now = Date.now, forceHttps = false, trustProxy = false, logErrors = true }) {
+  const store = createStore(db, createCipher(dataKey), now);
+  const sessions = createSessions(db, now);
+  const ctx = { db, store, sessions, now };
+
+  const app = express();
+  app.disable("x-powered-by");
+  if (trustProxy) app.set("trust proxy", 1);
+
+  app.use(securityHeaders({ forceHttps }));
+  app.use(express.json({ limit: "20kb" }));
+  app.use(sessions.middleware(store));
+
+  app.use((req, res, next) => {
+    if (req.method !== "GET") return next();
+    const page = req.path === "/" ? "index" : req.path.replace(/^\//, "").replace(/\.html$/, "");
+
+    if (page === "index" && req.user) return res.redirect("/home.html");
+    if (GUEST_PAGES.includes(page) && req.user) return res.redirect("/home.html");
+    if (PRIVATE_PAGES.includes(page)) {
+      res.set("Cache-Control", "no-store");
+      if (!req.user) {
+        const expired = req.sessionExpired ? "&expired=1" : "";
+        return res.redirect(`/login.html?next=${encodeURIComponent(req.originalUrl)}${expired}`);
+      }
+      if (page === "admin" && req.user.role !== "admin") {
+        store.audit.log("access_denied", { actorId: req.user.id, subjectId: req.user.id, detail: "admin page" });
+        return res.redirect("/home.html?denied=1");
+      }
+    }
+    next();
+  });
+
+  app.use(express.static(PUBLIC_DIR, { extensions: ["html"], maxAge: 0 }));
+
+  const api = express.Router();
+  api.use(noStore);
+  api.use(csrf());
+  api.use(require("./routes/auth")(ctx));
+  api.use(require("./routes/home")(ctx));
+  api.use(require("./routes/contacts")(ctx));
+  api.use(require("./routes/profile")(ctx));
+  api.use(require("./routes/admin")(ctx));
+  api.use((req, res) => res.status(404).json({ error: "Not found." }));
+  app.use("/api", api);
+
+  app.use((req, res) => res.status(404).sendFile(path.join(PUBLIC_DIR, "404.html")));
+
+  app.use((err, req, res, next) => {
+    let status = err.status || err.statusCode || 500;
+    if (status >= 500) {
+      status = 500;
+      if (logErrors) console.error(`[${new Date().toISOString()}] ${req.method} ${req.path}:`, err);
+    }
+    const messages = {
+      400: "That request didn't look right.",
+      403: err.csrf ? "Your session expired. Refresh the page and try again." : "You don't have access to that.",
+      413: "That was more data than we accept.",
+      415: "Send JSON.",
+      500: "Something went wrong. Please try again.",
+    };
+    const message = messages[status] || messages[500];
+    if (req.path.startsWith("/api/")) return res.status(status).json({ error: message });
+    res.status(status).type("text").send(message);
+  });
+
+  return app;
+}
+
+module.exports = { createApp };

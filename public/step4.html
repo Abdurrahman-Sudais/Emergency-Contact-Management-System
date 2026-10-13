@@ -17,17 +17,19 @@
         <h2>Who should we call first?</h2>
         <p>One person is enough. You can add more later.</p>
 
-        <form action="home.html" class="fields">
+        <form action="home.html" class="fields" id="first-contact" novalidate>
             <label class="lbl" for="name">Name</label>
-            <input class="input" id="name" type="text" placeholder="Tunde Bello" required>
+            <input class="input" id="name" name="name" type="text" placeholder="Tunde Bello" maxlength="80" required>
+            <div class="error" data-error-for="name" hidden><img src="images/triangle-alert.png" alt=""><span></span></div>
 
             <label class="lbl" for="phone">Phone number</label>
             <div class="phone-row">
-                <select class="input" aria-label="Country code">
+                <select class="input" id="country" aria-label="Country code">
                 <option>+234</option><option>+233</option><option>+44</option><option>+1</option>
-                </select>   
-                <input class="input" id="phone" type="tel" placeholder="802 555 0142" required>
-            </div>  
+                </select>
+                <input class="input" id="phone" name="phone" type="tel" placeholder="802 555 0142" maxlength="20" required>
+            </div>
+            <div class="error" data-error-for="phone" hidden><img src="images/triangle-alert.png" alt=""><span></span></div>
 
             <span class="lbl">Who are they to you?</span>
             <div class="chip-group">
@@ -37,11 +39,16 @@
                 <label class="chip"><input type="radio" name="relation" value="neighbour"><span>Neighbour</span></label>
             </div>
 
+            <div class="error-box error" id="form-error" hidden><span></span></div>
+
             <div class="spacer">
                 <button type="submit" class="next">Save and finish</button>
                 <a href="home.html" class="later">I'll do this later</a>
             </div>
         </form>
     </div>
+    <script src="js/validate.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/step4.js"></script>
 </body>
 </html>
