@@ -21,6 +21,7 @@ function createApp({ db, dataKey, now = Date.now, forceHttps = false, trustProxy
   app.disable("x-powered-by");
   if (trustProxy) app.set("trust proxy", 1);
 
+  app.get("/healthz", (req, res) => res.type("text").send("ok"));
   app.use(securityHeaders({ forceHttps }));
   app.use(express.json({ limit: "20kb" }));
   app.use(sessions.middleware(store));

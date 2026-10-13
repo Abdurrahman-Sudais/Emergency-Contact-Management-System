@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: incase
+    runtime: node
+    plan: starter
+    buildCommand: npm ci --omit=dev
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "1"
+      - key: DB_PATH
+        value: /var/data/incase.db
+      - key: DATA_KEY
+        generateValue: true
+    disk:
+      name: incase-data
+      mountPath: /var/data
+      sizeGB: 1

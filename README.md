@@ -70,6 +70,22 @@ Each one is explained on the in-app **Security** page and proven by tests in `te
 | 09 | Medical notes and contact notes encrypted with AES-256-GCM; key kept in `.env`; errors never leak details | `src/security/encryption.js` |
 | 10 | HTTPS forced in production, HSTS and hardening headers on every response | `src/security/headers.js`, `server.js` |
 
-## Deploying
+## Deploying to Render
 
-Set `NODE_ENV=production` and `DATA_KEY` on the host. If the host terminates HTTPS for you (Render, Railway and similar), also set `TRUST_PROXY=1`. In production, plain HTTP is redirected to HTTPS and cookies are marked `Secure`.
+The repo includes `render.yaml`, so Render sets most things up itself.
+
+1. Push this code to GitHub.
+2. On [render.com](https://render.com), sign in with GitHub, then click **New → Blueprint** and pick this repository.
+3. Render reads `render.yaml` and creates:
+   - a web service on the **Starter** plan (about $7/month). Paid is needed because only paid plans can have a disk.
+   - a 1 GB disk at `/var/data` where the database lives, so data survives restarts and redeploys.
+   - a random `DATA_KEY`, plus `NODE_ENV=production` and `TRUST_PROXY=1`.
+4. Click **Apply**. After a few minutes the site is live at `https://incase-xxxx.onrender.com` with HTTPS already on.
+5. Make yourself an admin: sign up on the live site, then open the service's **Shell** tab in Render and run
+   `npm run make-admin -- your@email.com`
+
+Don't run `npm run seed` on the live site: the demo passwords are published in this README.
+
+Keep `DATA_KEY` safe. If it is lost or changed, encrypted notes and medical details can no longer be read. Render keeps it under the service's **Environment** tab.
+
+For a free demo instead, change `plan: starter` to `plan: free` and delete the `disk:` section in `render.yaml`. The site works the same, but the free plan has no disk, so all accounts are wiped whenever the app restarts or goes to sleep.
