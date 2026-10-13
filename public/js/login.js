@@ -15,11 +15,6 @@
     if (params.get(key) === "1") InCase.flash(document.getElementById("notice"), notices[key]);
   });
 
-  document.getElementById("forgot").addEventListener("click", function (e) {
-    e.preventDefault();
-    document.getElementById("forgot-help").hidden = false;
-  });
-
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     var problem = InCaseValidate.email(email.value) || (password.value ? null : "Error: enter your password.");
@@ -32,7 +27,6 @@
     InCase.api("POST", "/api/login", {
       email: email.value,
       password: password.value,
-      remember: document.getElementById("remember").checked,
       next: params.get("next") || "",
     }).then(function (res) {
       location.href = res.next;

@@ -910,13 +910,6 @@ pre {
   color: var(--orange);
 }
 
-.remember {
-  margin-bottom: 20px;
-  justify-content: space-between;
-}
-.remember > * {
-  flex: 0 0 auto;
-}
 .hint {
   text-align: center;
   font-size: 13px;

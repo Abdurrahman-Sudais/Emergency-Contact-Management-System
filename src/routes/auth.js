@@ -23,7 +23,6 @@ module.exports = function authRoutes({ store, sessions, now }) {
     try {
       const email = text(req.body, "email");
       const password = typeof req.body?.password === "string" ? req.body.password : "";
-      const remember = req.body?.remember === true;
 
       const user = !V.email(email) && password.length <= 128 ? store.users.byEmail(email) : null;
       if (!user) {
@@ -50,7 +49,7 @@ module.exports = function authRoutes({ store, sessions, now }) {
       }
 
       store.users.recordLogin(user.id);
-      sessions.start(req, res, user.id, { persistent: remember });
+      sessions.start(req, res, user.id);
       store.audit.log("login", { actorId: user.id, subjectId: user.id, detail: deviceName(req.get("user-agent")) });
       res.json({ user: publicUser(user), next: safeNext(req.body?.next) });
     } catch (err) {

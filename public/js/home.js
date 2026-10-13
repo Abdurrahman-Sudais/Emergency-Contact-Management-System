@@ -57,9 +57,7 @@
     }
 
     var done = data.readiness.filter(function (r) { return r.done; }).length;
-    var left = data.readiness.length - done;
     $("ready-count").textContent = done + " of " + data.readiness.length + " done";
-    $("things-left").textContent = left ? left + " thing" + (left === 1 ? "" : "s") + " left to finish your setup." : "Your setup is complete.";
     var checklist = $("checklist");
     checklist.textContent = "";
     data.readiness.forEach(function (item) {
