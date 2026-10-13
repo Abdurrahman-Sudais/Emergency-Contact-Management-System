@@ -69,7 +69,7 @@ function createApp({ db, dataKey, now = Date.now, forceHttps = false, trustProxy
     const messages = {
       400: "That request didn't look right.",
       403: err.csrf ? "Your session expired. Refresh the page and try again." : "You don't have access to that.",
-      413: "That was more data than we accept.",
+      413: "That file is too big. Photos can be up to 2 MB.",
       415: "Send JSON.",
       500: "Something went wrong. Please try again.",
     };

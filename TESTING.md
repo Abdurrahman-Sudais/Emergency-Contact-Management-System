@@ -2,15 +2,15 @@
 
 This plan covers the eight kinds of testing the project requires. Six are automated: run `npm test` to repeat them. Usability and responsive testing need people and devices, so they have step-by-step scripts with spaces for results.
 
-**Latest automated run: 94 tests, 94 passed, 0 failed** (Node.js 24, Windows 11).
+**Latest automated run: 106 tests, 106 passed, 0 failed** (Node.js 24, Windows 11).
 
 | Kind of testing | How | Test IDs | File |
 |---|---|---|---|
 | 1. Functional | automated | FUN-01 – FUN-12 | `tests/functional.test.js` |
 | 2. Login / registration | automated | AUTH-01 – AUTH-14 | `tests/auth.test.js` |
 | 3. Form validation | automated | VAL-01 – VAL-15 | `tests/validation.test.js` |
-| 4. Security | automated | SEC-01 – SEC-32 | `tests/security.test.js` |
-| 5. Usability | manual script + automated label check | USE-01 – USE-08, UI-04 | below, `tests/pages.test.js` |
+| 4. Security | automated | SEC-01 – SEC-32, PHOTO-01 – PHOTO-12 | `tests/security.test.js`, `tests/photo.test.js` |
+| 5. Usability | manual script + automated label check | USE-01 – USE-09, UI-04 | below, `tests/pages.test.js` |
 | 6. Responsive / mobile | manual script + automated checks | RES-01 – RES-08, UI-01, UI-06 | below, `tests/pages.test.js` |
 | 7. Error handling | automated | UI-07 – UI-09, VAL-14, VAL-15, SEC-28 | `tests/pages.test.js` and others |
 | 8. Database | automated | DB-01 – DB-12 | `tests/database.test.js` |
@@ -118,6 +118,25 @@ Grouped by the ten safeguards on the app's Security page.
 | | SEC-31 | API caching | `Cache-Control: no-store` |
 | | SEC-32 | HTTP with HTTPS forced | 301 to https; POST refused; HSTS over HTTPS |
 
+### Profile photo uploads
+
+| ID | Attack or check | Expected result |
+|---|---|---|
+| PHOTO-01 | Upload a real PNG | Saved; shows in the session; downloads byte-for-byte |
+| PHOTO-02 | Upload a JPG carrying GPS location (EXIF) | Location data removed before saving |
+| PHOTO-03 | Upload a PNG with hidden text | Hidden text removed |
+| PHOTO-04 | Script text sent as "image/png" | Refused: the file is judged by its real contents, not its label |
+| PHOTO-05 | Cut-off / damaged image | Refused |
+| PHOTO-06 | SVG, HTML, unknown types | Refused (SVG can contain scripts) |
+| PHOTO-07 | File over 2 MB | Refused with "Photos can be up to 2 MB" |
+| PHOTO-08 | Upload without CSRF token | 403 |
+| PHOTO-09 | Signed out | Can't read or upload (401) |
+| PHOTO-10 | Another user asks for "the photo" | Only ever gets their own |
+| PHOTO-11 | Photo response headers | `nosniff`, `sandbox` CSP, shown inline: the browser can't treat it as a page |
+| PHOTO-12 | Remove photo; delete account | Photo gone in both cases |
+
+The browser also shrinks photos to 512px before sending them. That makes uploads quick and drops hidden metadata, but the server checks run on every upload regardless.
+
 ### Manual security checks (browser)
 
 Do these once in a real browser and note the result.
@@ -143,18 +162,19 @@ Do these once in a real browser and note the result.
 | USE-04 | "Make the doctor the first person called." | Doctor shows as 01 | under 1 min |
 | USE-05 | "Find your neighbour's number using search." | Uses search box | under 30 s |
 | USE-06 | "Add that you're allergic to penicillin." | Saved on Profile | under 1 min |
+| USE-09 | "Put a photo of yourself on your profile." | Photo shows in the top bar | under 1 min |
 | USE-07 | "Call the first person." (on a phone) | Taps the orange Call button; dialer opens | under 10 s |
 | USE-08 | "Sign out." | Back on the login page | under 20 s |
 
 Record for each tester: task completed (Y/N), time, number of wrong clicks, comments.
 
-| Tester | USE-01 | USE-02 | USE-03 | USE-04 | USE-05 | USE-06 | USE-07 | USE-08 | Comments |
-|---|---|---|---|---|---|---|---|---|---|
-| 1 | | | | | | | | | |
-| 2 | | | | | | | | | |
-| 3 | | | | | | | | | |
-| 4 | | | | | | | | | |
-| 5 | | | | | | | | | |
+| Tester | USE-01 | USE-02 | USE-03 | USE-04 | USE-05 | USE-06 | USE-07 | USE-08 | USE-09 | Comments |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | | | | | | | | | | |
+| 2 | | | | | | | | | | |
+| 3 | | | | | | | | | | |
+| 4 | | | | | | | | | | |
+| 5 | | | | | | | | | | |
 
 **Questionnaire** (1 = strongly disagree … 5 = strongly agree):
 1. I could find what I needed without help.
@@ -198,7 +218,7 @@ Manual: open each page at each size. In Chrome, use DevTools → device toolbar,
 
 | ID | What is tested | Expected result |
 |---|---|---|
-| DB-01 | Tables exist | users, contacts, sessions, audit_log |
+| DB-01 | Tables exist | users, contacts, sessions, audit_log, photos |
 | DB-02 | Duplicate email (any case) | Rejected by the database |
 | DB-03 | Unknown role or status | Rejected (CHECK constraint) |
 | DB-04 | Plain-text password stored | Rejected: must be an Argon2id hash |

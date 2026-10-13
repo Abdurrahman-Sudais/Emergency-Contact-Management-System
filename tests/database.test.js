@@ -17,9 +17,9 @@ const newUser = (email, extra = {}) => store.users.create({ name: "Db User", ema
 const newContact = (userId, name = "Contact Person") => store.contacts.create(userId, { name, phone: "+2348025550142", relationship: "family" });
 
 describe("Schema rules", () => {
-  test("DB-01 the four tables exist", () => {
+  test("DB-01 the five tables exist", () => {
     const names = db.prepare(`SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name`).all().map((r) => r.name);
-    assert.deepEqual(names, ["audit_log", "contacts", "sessions", "users"]);
+    assert.deepEqual(names, ["audit_log", "contacts", "photos", "sessions", "users"]);
   });
 
   test("DB-02 emails are unique, ignoring capitals", () => {

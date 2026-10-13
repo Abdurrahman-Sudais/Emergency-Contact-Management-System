@@ -21,7 +21,7 @@ src/               ← the server (Node.js + Express)
   routes/            the API: auth, home, contacts, profile, admin
   security/          password hashing, sessions, CSRF tokens, encryption, headers
   store.js, db.js    the SQLite database and every query
-tests/             ← 94 automated tests (see TESTING.md)
+tests/             ← 106 automated tests (see TESTING.md)
 ```
 
 The pages are normal HTML files. When one loads, its script asks the server for data (`fetch("/api/contacts")`) and fills the page in. Forms send their data the same way. The server is still needed: password hashing, sessions, role checks and SQL-injection protection have to happen somewhere users can't tamper with, and anyone can edit the JavaScript running in their own browser.
@@ -62,7 +62,7 @@ Each one is explained on the in-app **Security** page and proven by tests in `te
 | 01 | Login/logout; logout deletes the session on the server; 5 failed logins lock the account for 15 min | `src/routes/auth.js` |
 | 02 | Passwords stored only as salted **Argon2id** hashes | `src/security/passwords.js` |
 | 03 | Roles (User/Admin) read from the database on every request | `src/routes/guards.js`, `src/app.js` |
-| 04 | Validation in the browser **and** again on the server, using the same rules | `public/js/validate.js` |
+| 04 | Validation in the browser **and** again on the server, using the same rules; profile photos checked by their real contents, max 2 MB, location data stripped | `public/js/validate.js`, `src/security/images.js` |
 | 05 | SQL injection: every query uses `?` parameters | `src/store.js` |
 | 06 | XSS: pages insert data with `textContent`; strict Content Security Policy | `public/js/api.js`, `src/security/headers.js` |
 | 07 | Sessions: random 256-bit token, HttpOnly/Secure/SameSite cookie, new ID at login, 15-min idle timeout, CSRF tokens | `src/security/sessions.js`, `csrf.js` |

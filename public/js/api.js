@@ -14,9 +14,10 @@ var InCase = (function () {
     return session().then(function (s) {
       var options = { method: method, credentials: "same-origin", headers: {} };
       if (method !== "GET") {
-        options.headers["Content-Type"] = "application/json";
+        var isFile = data instanceof Blob;
+        options.headers["Content-Type"] = isFile ? data.type : "application/json";
         options.headers["X-CSRF-Token"] = s.csrfToken;
-        options.body = JSON.stringify(data || {});
+        options.body = isFile ? data : JSON.stringify(data || {});
       }
       return fetch(url, options);
     }).then(function (res) {
@@ -54,6 +55,19 @@ var InCase = (function () {
   function initials(name) {
     var parts = String(name || "").replace(/^(dr|mr|mrs|ms|prof)\.?\s+/i, "").split(/\s+/).filter(Boolean);
     return ((parts[0] || "").charAt(0) + (parts.length > 1 ? parts[parts.length - 1].charAt(0) : "")).toUpperCase();
+  }
+
+  function avatar(node, user) {
+    if (!node || !user) return;
+    node.textContent = "";
+    if (user.photo) node.appendChild(el("img", { src: "/api/profile/photo?v=" + user.photo, alt: "" }));
+    else node.textContent = initials(user.name);
+  }
+
+  function paintAvatars(user) {
+    document.querySelectorAll(".user .avatar, #avatar-big, #profile-initials").forEach(function (node) {
+      avatar(node, user);
+    });
   }
 
   function firstName(name) {
@@ -107,7 +121,7 @@ var InCase = (function () {
   }
 
   return {
-    session: session, resetSession: resetSession, api: api, el: el, icon: icon, initials: initials, firstName: firstName, pad2: pad2,
+    session: session, resetSession: resetSession, api: api, el: el, icon: icon, initials: initials, avatar: avatar, paintAvatars: paintAvatars, firstName: firstName, pad2: pad2,
     RELATIONSHIPS: RELATIONSHIPS, longDate: longDate, shortDate: shortDate,
     showFieldError: showFieldError, flash: flash,
   };

@@ -13,6 +13,8 @@ function eventText(e) {
     case "profile_updated": return "Profile details updated";
     case "medical_updated": return "Medical notes updated";
     case "password_changed": return "Password changed";
+    case "photo_updated": return "Profile photo changed";
+    case "photo_removed": return "Profile photo removed";
     case "role_changed": return `Role changed to ${d}`;
     case "suspended": return "Account suspended";
     case "reinstated": return "Account reinstated";

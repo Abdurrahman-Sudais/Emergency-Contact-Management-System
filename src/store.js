@@ -144,6 +144,19 @@ function createStore(db, cipher, now) {
     return { ...rest, note: cipher.decrypt(note_enc) };
   }
 
+  const photos = {
+    get: (userId) => q(`SELECT type, data, updated_at FROM photos WHERE user_id = ?`).get(userId),
+    version: (userId) => q(`SELECT updated_at FROM photos WHERE user_id = ?`).get(userId)?.updated_at ?? null,
+    set(userId, type, data) {
+      const t = now();
+      q(`INSERT INTO photos (user_id, type, data, updated_at) VALUES (?, ?, ?, ?)
+         ON CONFLICT (user_id) DO UPDATE SET type = excluded.type, data = excluded.data, updated_at = excluded.updated_at`)
+        .run(userId, type, data, t);
+      return t;
+    },
+    remove: (userId) => q(`DELETE FROM photos WHERE user_id = ?`).run(userId).changes,
+  };
+
   const audit = {
     log(event, { actorId = null, subjectId = null, detail = null } = {}) {
       q(`INSERT INTO audit_log (actor_id, subject_id, event, detail, created_at) VALUES (?, ?, ?, ?, ?)`)
@@ -160,7 +173,7 @@ function createStore(db, cipher, now) {
     removeForUser: (userId) => q(`DELETE FROM audit_log WHERE subject_id = ?`).run(userId),
   };
 
-  return { users, contacts, audit };
+  return { users, contacts, photos, audit };
 }
 
 function escapeLike(s) {

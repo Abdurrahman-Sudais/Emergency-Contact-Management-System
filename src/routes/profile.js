@@ -4,6 +4,9 @@ const { requireUser, text, rejectIfInvalid } = require("./guards");
 const { hashPassword, verifyPassword } = require("../security/passwords");
 const { BLOOD_GROUPS } = require("../store");
 const { transaction } = require("../db");
+const { detectImageType, cleanImage, IMAGE_TYPES } = require("../security/images");
+
+const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
 
 const str = (body, key) => (typeof body?.[key] === "string" ? body[key] : "");
 
@@ -22,6 +25,39 @@ module.exports = function profileRoutes({ db, store, sessions }) {
       medical: store.users.getMedical(u),
       bloodGroups: BLOOD_GROUPS,
     });
+  });
+
+  r.get("/profile/photo", (req, res) => {
+    const photo = store.photos.get(req.user.id);
+    if (!photo) return res.status(404).json({ error: "No photo yet." });
+    res.set({
+      "Content-Type": photo.type,
+      "Content-Disposition": 'inline; filename="photo"',
+      "Content-Security-Policy": "default-src 'none'; sandbox",
+      "Cache-Control": "private, no-store",
+    });
+    res.send(Buffer.from(photo.data));
+  });
+
+  r.put("/profile/photo", express.raw({ type: IMAGE_TYPES, limit: MAX_PHOTO_BYTES }), (req, res) => {
+    const type = detectImageType(req.body);
+    if (!type) {
+      return res.status(422).json({ error: "Error: that file isn't a JPG, PNG or WebP picture." });
+    }
+    const clean = cleanImage(req.body, type);
+    if (!clean) {
+      return res.status(422).json({ error: "Error: that picture looks damaged. Try another one." });
+    }
+    const version = store.photos.set(req.user.id, type, clean);
+    store.audit.log("photo_updated", { actorId: req.user.id, subjectId: req.user.id });
+    res.json({ ok: true, photo: version, message: "Photo updated." });
+  });
+
+  r.delete("/profile/photo", (req, res) => {
+    if (store.photos.remove(req.user.id)) {
+      store.audit.log("photo_removed", { actorId: req.user.id, subjectId: req.user.id });
+    }
+    res.json({ ok: true, photo: null, message: "Photo removed." });
   });
 
   r.put("/profile/details", (req, res) => {

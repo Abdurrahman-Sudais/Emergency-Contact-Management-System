@@ -26,7 +26,8 @@ function csrf() {
 
     if (SAFE.includes(req.method)) return next();
 
-    if (!req.is("application/json")) {
+    const photoUpload = req.path === "/profile/photo" && req.is(["image/jpeg", "image/png", "image/webp"]);
+    if (!req.is("application/json") && !photoUpload) {
       const err = new Error("Expected JSON");
       err.status = 415;
       return next(err);

@@ -56,6 +56,13 @@ CREATE TABLE IF NOT EXISTS audit_log (
   created_at INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS audit_by_subject ON audit_log (subject_id, created_at);
+
+CREATE TABLE IF NOT EXISTS photos (
+  user_id    INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  type       TEXT    NOT NULL CHECK (type IN ('image/jpeg', 'image/png', 'image/webp')),
+  data       BLOB    NOT NULL CHECK (length(data) <= 2097152),
+  updated_at INTEGER NOT NULL
+);
 `;
 
 function openDatabase(file) {

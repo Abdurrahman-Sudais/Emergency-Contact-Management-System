@@ -8,11 +8,11 @@
     var user = s.user;
 
     document.querySelectorAll(".user").forEach(function (box) {
-      var avatar = box.querySelector(".avatar");
       var name = box.querySelector(".user-name");
-      if (avatar) avatar.textContent = InCase.initials(user.name);
       if (name) name.textContent = user.name;
     });
+
+    InCase.paintAvatars(user);
 
     if (user.role !== "admin") {
       document.querySelectorAll('a[href="admin.html"]').forEach(function (a) { a.remove(); });

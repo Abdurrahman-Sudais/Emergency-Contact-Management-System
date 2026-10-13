@@ -14,7 +14,9 @@ module.exports = function authRoutes({ store, sessions, now }) {
   const r = express.Router();
 
   r.get("/session", (req, res) => {
-    res.json({ user: publicUser(req.user), csrfToken: req.csrfToken });
+    const user = publicUser(req.user);
+    if (user) user.photo = store.photos.version(user.id);
+    res.json({ user, csrfToken: req.csrfToken });
   });
 
   r.post("/login", async (req, res, next) => {

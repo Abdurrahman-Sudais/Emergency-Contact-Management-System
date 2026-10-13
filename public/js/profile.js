@@ -13,7 +13,6 @@
   }
 
   function fill(p) {
-    $("profile-initials").textContent = InCase.initials(p.name);
     $("profile-name").textContent = p.name;
     var joined = new Date(p.joined).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
     $("profile-meta").textContent = (p.role === "admin" ? "Admin" : "User") + " · joined " + joined;
@@ -46,6 +45,7 @@
       said(details, res.message);
       load();
       document.querySelectorAll(".user .user-name").forEach(function (n) { n.textContent = $("p-name").value.trim(); });
+      refreshAvatars();
     }).catch(function (err) {
       showServerErrors(details, err, { name: "p-name", phone: "p-phone", email: "p-email" });
     });
@@ -97,6 +97,68 @@
       location.href = "login.html?deleted=1";
     }).catch(function (err) {
       InCase.showFieldError($("del-pw"), err.message);
+    });
+  });
+
+  var MAX_SIDE = 512;
+  var MAX_FILE = 10 * 1024 * 1024;
+  var TYPES = ["image/jpeg", "image/png", "image/webp"];
+  var photoInput = $("photo-input");
+
+  function refreshAvatars() {
+    InCase.resetSession();
+    return InCase.session().then(function (s) {
+      InCase.paintAvatars(s.user);
+      $("photo-remove").hidden = !s.user.photo;
+    });
+  }
+  refreshAvatars();
+
+  function photoError(message) {
+    InCase.showFieldError(photoInput, message);
+  }
+
+  function shrink(file) {
+    return createImageBitmap(file).then(function (img) {
+      var scale = Math.min(1, MAX_SIDE / Math.max(img.width, img.height));
+      var canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      return new Promise(function (resolve, reject) {
+        canvas.toBlob(function (blob) { blob ? resolve(blob) : reject(new Error()); }, "image/jpeg", 0.9);
+      });
+    });
+  }
+
+  $("photo-change").addEventListener("click", function () {
+    photoInput.click();
+  });
+
+  photoInput.addEventListener("change", function () {
+    var file = photoInput.files[0];
+    photoInput.value = "";
+    if (!file) return;
+    if (TYPES.indexOf(file.type) < 0) return photoError("Error: choose a JPG, PNG or WebP picture.");
+    if (file.size > MAX_FILE) return photoError("Error: that picture is too big. Choose one under 10 MB.");
+    photoError(null);
+    $("photo-change").disabled = true;
+
+    shrink(file).catch(function () {
+      throw new Error("Error: that picture couldn't be opened. Try another one.");
+    }).then(function (blob) {
+      return InCase.api("PUT", "/api/profile/photo", blob);
+    }).then(refreshAvatars).catch(function (err) {
+      photoError(err.message);
+    }).finally(function () {
+      $("photo-change").disabled = false;
+    });
+  });
+
+  $("photo-remove").addEventListener("click", function () {
+    if (!confirm("Remove your profile photo?")) return;
+    InCase.api("DELETE", "/api/profile/photo").then(refreshAvatars).catch(function (err) {
+      photoError(err.message);
     });
   });
 })();

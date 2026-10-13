@@ -26,6 +26,14 @@
             <div>
                 <h1 id="profile-name"></h1>
                 <span class="muted" id="profile-meta"></span>
+                <div class="field photo-field">
+                    <div class="photo-actions">
+                        <button class="btn btn-small" type="button" id="photo-change">Change photo</button>
+                        <button class="btn btn-small" type="button" id="photo-remove" hidden>Remove photo</button>
+                    </div>
+                    <input type="file" id="photo-input" accept="image/jpeg,image/png,image/webp" aria-label="Profile photo" hidden>
+                    <div class="error" data-error-for="photo-input" hidden><img src="images/triangle-alert.png" alt=""><span></span></div>
+                </div>
             </div>
         </div>
 

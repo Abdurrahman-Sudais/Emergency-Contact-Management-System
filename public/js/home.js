@@ -7,7 +7,6 @@
 
   InCase.session().then(function (s) {
     $("first-name").textContent = InCase.firstName(s.user.name);
-    $("avatar-big").textContent = InCase.initials(s.user.name);
   });
 
   if (new URLSearchParams(location.search).get("denied") === "1") {
