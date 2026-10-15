@@ -519,33 +519,63 @@ h2 {
 }
 
 
-/* Tour pages: each page slides in from the right on load */
+/* Tour smooth in-place fade & motion transitions */
 .screen.tour {
   overflow-x: hidden;
+  position: relative;
 }
-.tour-content {
+.tour-steps-container {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
-  animation: tourSlideIn 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-.tour-content .cards,
-.tour-content .lock,
-.tour-content .emergency {
+.tour-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.2, 0.9, 0.3, 1), visibility 0.28s;
+  transform: scale(0.98);
+}
+.tour-step.active {
+  opacity: 1;
+  visibility: visible;
+  position: relative;
+  pointer-events: auto;
+  transform: scale(1) translateX(0);
+}
+.tour-step.entering-from-right {
+  opacity: 0;
+  transform: translateX(36px) scale(0.98);
+}
+.tour-step.entering-from-left {
+  opacity: 0;
+  transform: translateX(-36px) scale(0.98);
+}
+.tour-step.fading-out-left {
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  transform: translateX(-36px) scale(0.98);
+}
+.tour-step.fading-out-right {
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  transform: translateX(36px) scale(0.98);
+}
+.tour-step .cards,
+.tour-step .lock,
+.tour-step .emergency {
   margin: auto 0;
 }
-.tour-content h2 {
+.tour-step h2 {
   margin-top: auto;
-}
-@keyframes tourSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(48px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
 }
 
 @media (min-width: 600px) {
@@ -561,17 +591,19 @@ h2 {
     display: flex;
     flex-direction: column;
   }
-  .tour-content {
+  .tour-step {
     display: grid;
     grid-template-columns: 1.1fr 1fr;
     grid-template-rows: auto 1fr auto auto auto 1fr;
     column-gap: 96px;
     align-items: center;
-    animation: none;
   }
-  .tour-content > .cards,
-  .tour-content > .lock,
-  .tour-content > .emergency {
+  .tour-step:not(.active) {
+    display: none;
+  }
+  .tour-step > .cards,
+  .tour-step > .lock,
+  .tour-step > .emergency {
     grid-column: 1;
     grid-row: 1 / 7;
     align-self: center;
@@ -580,24 +612,24 @@ h2 {
     max-width: 460px;
     margin: 0;
   }
-  .tour-content > .lock {
+  .tour-step > .lock {
     width: 140px;
     height: 140px;
   }
-  .tour-content > h2 {
+  .tour-step > h2 {
     grid-column: 2;
     grid-row: 2;
     font-size: 54px;
     margin-bottom: 20px;
     margin-top: 0;
   }
-  .tour-content > p {
+  .tour-step > p {
     grid-column: 2;
     grid-row: 3;
     font-size: 20px;
     max-width: 440px;
   }
-  .tour-content > .next {
+  .tour-step > .next {
     grid-column: 2;
     grid-row: 4;
     justify-self: start;
