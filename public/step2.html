@@ -8,58 +8,26 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="screen light tour" id="tour-screen" data-step="1">
+    <div class="screen light tour" data-tour-page="2">
         <header>
-            <div class="dots" id="tour-dots">
-                <span class="dot" data-index="0" role="button" aria-label="Step 1 of 3"></span>
-                <span class="dot on" data-index="1" role="button" aria-label="Step 2 of 3"></span>
-                <span class="dot" data-index="2" role="button" aria-label="Step 3 of 3"></span>
+            <div class="dots">
+                <span role="button" aria-label="Step 1 of 3"></span>
+                <span class="on" role="button" aria-label="Step 2 of 3" aria-current="step"></span>
+                <span role="button" aria-label="Step 3 of 3"></span>
             </div>
             <a href="step4.html" class="skip">Skip</a>
         </header>
 
-        <div class="tour-slider" id="tour-slider">
-            <div class="tour-track" id="tour-track">
-                <!-- Slide 1 -->
-                <div class="tour-slide" data-slide="0">
-                    <div class="cards">
-                        <div class="card"><b class="num on">1</b><div>Tunde<br><small>Brother</small></div></div>
-                        <div class="card"><b class="num">2</b><div>Dr. Kemi<br><small>Doctor</small></div></div>
-                        <div class="card"><b class="num">3</b><div>Funke<br><small>Neighbour</small></div></div>
-                    </div>
-                    <h2>Set the order. We make the calls easy.</h2>
-                    <p>Rank the people you trust. In an emergency, InCase puts the first one a single tap away.</p>
-                    <a href="step2.html" class="next next-tour-btn">Next<img src="images/arrow-right.png" alt=""></a>
-                </div>
-
-                <!-- Slide 2 -->
-                <div class="tour-slide" data-slide="1">
-                    <div class="lock">
-                        <img src="images/lock.png" alt="">
-                        <span class="tag only">Only you</span>
-                        <span class="tag enc">Encrypted</span>
-                    </div>
-                    <h2>Your circle stays private.</h2>
-                    <p>Contacts are encrypted and only you see them. You choose what a responder can read.</p>
-                    <a href="step3.html" class="next next-tour-btn">Next<img src="images/arrow-right.png" alt=""></a>
-                </div>
-
-                <!-- Slide 3 -->
-                <div class="tour-slide" data-slide="2">
-                    <div class="emergency">
-                        <p class="label">EMERGENCY MODE</p>
-                        <h3>Call Tunde</h3>
-                        <a href="#" class="call-btn"><img src="images/phone.png" alt="">Call now</a>
-                        <div class="pills">
-                            <span class="pill"><img src="images/map-pin.png" alt="">Share location</span>
-                            <span class="pill">Next: Dr. Kemi</span>
-                        </div>
-                    </div>
-                    <h2>One button when it counts.</h2>
-                    <p>Emergency mode shows big call buttons and shares your location. Nothing else on screen.</p>
-                    <a href="step4.html" class="next">Add my first contact <img src="images/arrow-right.png" alt=""></a>
-                </div>
+        <div class="tour-content">
+            <div class="lock">
+                <img src="images/lock.png" alt="">
+                <span class="tag only">Only you</span>
+                <span class="tag enc">Encrypted</span>
             </div>
+
+            <h2>Your circle stays private.</h2>
+            <p>Contacts are encrypted and only you see them. You choose what a responder can read.</p>
+            <a href="step3.html" class="next">Next<img src="images/arrow-right.png" alt=""></a>
         </div>
     </div>
     <script src="js/tour.js"></script>
