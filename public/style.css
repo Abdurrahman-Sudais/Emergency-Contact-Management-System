@@ -404,6 +404,8 @@ h2 {
 .dots span {
   width: 7px;
   height: 7px;
+  cursor: pointer;
+  transition: width 0.3s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.3s ease;
 }
 .dots span.on {
   width: 28px;
@@ -516,6 +518,56 @@ h2 {
   height: 16px;
 }
 
+
+.screen.tour {
+  overflow-x: hidden;
+}
+.tour-slider {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  touch-action: pan-y;
+  cursor: grab;
+}
+.tour-slider.dragging {
+  cursor: grabbing;
+}
+.tour-track {
+  display: flex;
+  width: 100%;
+  flex: 1;
+  will-change: transform;
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.tour-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  min-width: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+.tour-slide .cards,
+.tour-slide .lock,
+.tour-slide .emergency {
+  margin: auto 0;
+}
+.tour-slide h2 {
+  margin-top: auto;
+}
+[data-step="0"] .tour-track {
+  transform: translateX(0%);
+}
+[data-step="1"] .tour-track {
+  transform: translateX(-100%);
+}
+[data-step="2"] .tour-track {
+  transform: translateX(-200%);
+}
+
 @media (min-width: 600px) {
   .screen.light {
     padding-top: 40px;
@@ -526,43 +578,47 @@ h2 {
   .screen.tour {
     max-width: 1160px;
     padding: 40px 64px;
+    display: flex;
+    flex-direction: column;
+  }
+  .tour-slide {
     display: grid;
     grid-template-columns: 1.1fr 1fr;
     grid-template-rows: auto 1fr auto auto auto 1fr;
     column-gap: 96px;
+    align-items: center;
   }
-  .tour > header {
-    grid-column: 1 / -1;
-    grid-row: 1;
-  }
-  .tour > :nth-child(2) {
+  .tour-slide > .cards,
+  .tour-slide > .lock,
+  .tour-slide > .emergency {
     grid-column: 1;
-    grid-row: 2 / 7;
+    grid-row: 1 / 7;
     align-self: center;
     justify-self: center;
     width: 100%;
     max-width: 460px;
-  }
-  .tour > .lock {
-    width: 140px;
-    height: 140px;
     margin: 0;
   }
-  .tour > h2 {
+  .tour-slide > .lock {
+    width: 140px;
+    height: 140px;
+  }
+  .tour-slide > h2 {
     grid-column: 2;
-    grid-row: 3;
+    grid-row: 2;
     font-size: 54px;
     margin-bottom: 20px;
+    margin-top: 0;
   }
-  .tour > p {
+  .tour-slide > p {
     grid-column: 2;
-    grid-row: 4;
+    grid-row: 3;
     font-size: 20px;
     max-width: 440px;
   }
-  .tour > .next {
+  .tour-slide > .next {
     grid-column: 2;
-    grid-row: 5;
+    grid-row: 4;
     justify-self: start;
     padding: 20px 44px;
     margin-top: 36px;

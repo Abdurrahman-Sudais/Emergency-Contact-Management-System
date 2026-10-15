@@ -38,7 +38,10 @@
 
             <div class="field">
                 <label for="password">Password</label>
-                <input id="password" name="password" type="password" autocomplete="new-password" maxlength="128" required>
+                <div class="row">
+                    <input id="password" name="password" type="password" autocomplete="new-password" maxlength="128" required>
+                    <button type="button" class="btn toggle-pw" id="toggle"><img src="images/eye.png" alt=""> Show</button>
+                </div>
                 <div class="check" data-check="length"><img src="images/x.png" alt=""> 10 or more characters</div>
                 <div class="check" data-check="symbol"><img src="images/x.png" alt=""> One symbol, like ! or #</div>
                 <div class="error" data-error-for="password" hidden><img src="images/triangle-alert.png" alt=""><span></span></div>
@@ -48,6 +51,7 @@
         </form>
     </main>
 
+    <script src="show.js"></script>
     <script src="js/validate.js"></script>
     <script src="js/api.js"></script>
     <script src="js/signup.js"></script>

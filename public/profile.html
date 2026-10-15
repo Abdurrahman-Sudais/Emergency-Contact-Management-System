@@ -88,10 +88,22 @@
             </div>
             <form action="profile.html" id="password-form" novalidate>
                 <div class="two-fields">
-                    <div class="field"><label for="old-pw">Current password</label><input id="old-pw" type="password" autocomplete="current-password" maxlength="128">
-                        <div class="error" data-error-for="old-pw" hidden><img src="images/triangle-alert.png" alt=""><span></span></div></div>
-                    <div class="field"><label for="new-pw">New password</label><input id="new-pw" type="password" minlength="10" maxlength="128" autocomplete="new-password">
-                        <div class="error" data-error-for="new-pw" hidden><img src="images/triangle-alert.png" alt=""><span></span></div></div>
+                    <div class="field">
+                        <label for="old-pw">Current password</label>
+                        <div class="row">
+                            <input id="old-pw" type="password" autocomplete="current-password" maxlength="128">
+                            <button type="button" class="btn btn-small toggle-pw" aria-label="Show password"><img src="images/eye.png" alt=""> Show</button>
+                        </div>
+                        <div class="error" data-error-for="old-pw" hidden><img src="images/triangle-alert.png" alt=""><span></span></div>
+                    </div>
+                    <div class="field">
+                        <label for="new-pw">New password</label>
+                        <div class="row">
+                            <input id="new-pw" type="password" minlength="10" maxlength="128" autocomplete="new-password">
+                            <button type="button" class="btn btn-small toggle-pw" aria-label="Show password"><img src="images/eye.png" alt=""> Show</button>
+                        </div>
+                        <div class="error" data-error-for="new-pw" hidden><img src="images/triangle-alert.png" alt=""><span></span></div>
+                    </div>
                 </div>
                 <div class="flash" data-message hidden><span></span></div>
                 <button class="btn btn-dark" type="submit">Update password</button>
@@ -115,8 +127,14 @@
                 <button class="btn btn-danger" type="button" id="delete-open">Delete my account</button>
                 <p>You will confirm with your password first.</p>
                 <form id="delete-form" hidden novalidate>
-                    <div class="field"><label for="del-pw">Your password</label><input id="del-pw" type="password" autocomplete="current-password" maxlength="128">
-                        <div class="error" data-error-for="del-pw" hidden><img src="images/triangle-alert.png" alt=""><span></span></div></div>
+                    <div class="field">
+                        <label for="del-pw">Your password</label>
+                        <div class="row">
+                            <input id="del-pw" type="password" autocomplete="current-password" maxlength="128">
+                            <button type="button" class="btn btn-small toggle-pw" aria-label="Show password"><img src="images/eye.png" alt=""> Show</button>
+                        </div>
+                        <div class="error" data-error-for="del-pw" hidden><img src="images/triangle-alert.png" alt=""><span></span></div>
+                    </div>
                     <button class="btn btn-danger" type="submit">Delete everything for good</button>
                 </form>
             </div>
@@ -130,6 +148,7 @@
         <a href="admin.html"><i data-lucide="lock"></i>Admin</a>
     </nav>
     <script src="js/lucide.min.js"></script>
+    <script src="show.js"></script>
     <script src="js/validate.js"></script>
     <script src="js/api.js"></script>
     <script src="js/nav.js"></script>
