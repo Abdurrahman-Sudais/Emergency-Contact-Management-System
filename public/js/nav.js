@@ -14,8 +14,14 @@
 
     InCase.paintAvatars(user);
 
-    if (user.role !== "admin") {
-      document.querySelectorAll('a[href="admin.html"]').forEach(function (a) { a.remove(); });
+    if (user.role === "admin") {
+      document.querySelectorAll(".admin-only").forEach(function (a) {
+        a.hidden = false;
+      });
+    } else {
+      document.querySelectorAll('a[href="admin.html"]').forEach(function (a) {
+        a.remove();
+      });
     }
   });
 

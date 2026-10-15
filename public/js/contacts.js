@@ -54,29 +54,90 @@
         : "Your list is empty. Add the people you'd want called in an emergency, in the order you'd call them.";
     }
 
+    if (state.filter === "review" && !contacts.length) {
+      $("no-results").textContent = "All contacts are verified! Your emergency list is completely up to date.";
+    }
+
+    if (state.filter === "review" && contacts.length) {
+      list.appendChild(el("div", { className: "filter-hint" }, [
+        "Confirm the phone number is active, then tap \"Verify number\" to mark it verified."
+      ]));
+    }
+
     contacts.forEach(function (c) {
       var role = c.label || InCase.RELATIONSHIPS[c.relationship];
-      list.appendChild(el("div", { className: "list-row" }, [
+
+      var upBtn = el("button", {
+        type: "button",
+        className: "order-btn",
+        title: "Move up (calls earlier in emergency)",
+        "aria-label": "Move " + c.name + " up",
+        disabled: c.position === 1,
+      }, ["▲"]);
+      upBtn.addEventListener("click", function () { move(c, "up"); });
+
+      var downBtn = el("button", {
+        type: "button",
+        className: "order-btn",
+        title: "Move down (calls later)",
+        "aria-label": "Move " + c.name + " down",
+        disabled: c.position === state.total,
+      }, ["▼"]);
+      downBtn.addEventListener("click", function () { move(c, "down"); });
+
+      var orderCol = el("div", { className: "order-col" }, [
         el("span", { className: "num" }, [InCase.pad2(c.position)]),
+        el("div", { className: "order-btns" }, [upBtn, downBtn]),
+      ]);
+
+      var verifyEl;
+      if (c.verified) {
+        verifyEl = el("span", { className: "badge green" }, [el("img", { src: "images/check.png", alt: "" }), " Verified"]);
+      } else {
+        verifyEl = el("button", {
+          type: "button",
+          className: "badge badge-verify",
+          title: "Tap to verify " + c.name + "'s phone number",
+          "aria-label": "Verify " + c.name + "'s number",
+        }, [
+          el("img", { src: "images/check.png", alt: "" }),
+          " Verify number"
+        ]);
+        verifyEl.addEventListener("click", function () { verifyContact(c); });
+      }
+
+      list.appendChild(el("div", { className: "list-row" }, [
+        orderCol,
         el("span", { className: "avatar" }, [InCase.initials(c.name)]),
         el("div", { className: "who" }, [
           el("b", {}, [c.name]),
           el("small", {}, [role + " · " + V.formatPhone(c.phone)]),
           c.note ? el("span", { className: "note" }, [c.note]) : null,
         ]),
-        c.verified
-          ? el("span", { className: "badge green" }, [el("img", { src: "images/check.png", alt: "" }), " Verified"])
-          : el("span", { className: "badge grey" }, ["Needs review"]),
+        verifyEl,
         el("div", { className: "row-actions" }, [
           el("a", { href: "tel:" + c.phone, className: "icon-btn", title: "Call", "aria-label": "Call " + c.name }, [el("i", { dataset: { lucide: "phone" } })]),
-          smallButton("Move up", "chevron-up", function () { move(c, "up"); }, c.position === 1),
-          smallButton("Move down", "chevron-down", function () { move(c, "down"); }, c.position === state.total),
           smallButton("Edit", "pencil", function () { openEdit(c); }),
           smallButton("Delete", "trash-2", function () { remove(c); }),
         ]),
       ]));
     });
     if (window.lucide) lucide.createIcons();
+  }
+
+  function verifyContact(c) {
+    var updated = {
+      name: c.name,
+      phone: c.phone,
+      relationship: c.relationship,
+      label: c.label || "",
+      note: c.note || "",
+      verified: true
+    };
+    InCase.api("PUT", "/api/contacts/" + c.id, updated).then(function () {
+      message("✓ " + c.name + " marked as verified!");
+      load();
+    }).catch(function (err) { message(err.message); });
   }
 
   var timer;

@@ -32,8 +32,34 @@
       $("hero-call").href = "tel:" + first.phone;
       $("hero-call").querySelector("span").textContent = "Call " + InCase.firstName(first.name);
       if (!first.verified) {
-        $("hero-badge").className = "badge grey";
-        $("hero-badge").textContent = "Needs review";
+        $("hero-badge").className = "badge-verify hero-badge-verify";
+        $("hero-badge").textContent = "";
+        $("hero-badge").appendChild(el("img", { src: "images/check.png", alt: "" }));
+        $("hero-badge").appendChild(document.createTextNode(" Needs review · Tap to verify"));
+        $("hero-badge").title = "Tap to verify " + first.name + "'s number";
+        $("hero-badge").setAttribute("role", "button");
+        $("hero-badge").setAttribute("tabindex", "0");
+        $("hero-badge").onclick = function () {
+          var updated = {
+            name: first.name,
+            phone: first.phone,
+            relationship: first.relationship,
+            label: first.label || "",
+            note: first.note || "",
+            verified: true
+          };
+          InCase.api("PUT", "/api/contacts/" + first.id, updated).then(function () {
+            location.reload();
+          });
+        };
+      } else {
+        $("hero-badge").className = "badge green";
+        $("hero-badge").textContent = "";
+        $("hero-badge").appendChild(el("img", { src: "images/check.png", alt: "" }));
+        $("hero-badge").appendChild(document.createTextNode(" Verified"));
+        $("hero-badge").onclick = null;
+        $("hero-badge").removeAttribute("role");
+        $("hero-badge").removeAttribute("tabindex");
       }
 
       var list = $("side-list");

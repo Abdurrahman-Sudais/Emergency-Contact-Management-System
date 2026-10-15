@@ -15,7 +15,7 @@
             <a href="contacts.html" class="active">Contacts</a>
             <a href="profile.html">Profile</a>
             <a href="security.html">Security</a>
-            <a href="admin.html">Admin</a>
+            <a href="admin.html" class="admin-only" hidden>Admin</a>
         </div>
         <div class="user"><span class="avatar"></span> <span class="user-name"></span> <a href="login.html">Log out</a></div>
     </nav>
@@ -26,7 +26,11 @@
                 <p class="eyebrow" id="people-count"></p>
                 <h1>Contacts</h1>
             </div>
-        <button class="btn btn-dark" id="open-drawer"><img src="images/plus.png" alt="">Add Contact</button>
+            <button class="btn btn-dark" id="open-drawer"><img src="images/plus.png" alt="">Add Contact</button>
+        </div>
+
+        <div class="order-hint-banner">
+            <span><b>Priority Order:</b> Person <b>#01</b> is called first. Tap <b>▲</b> or <b>▼</b> to change who is called first.</span>
         </div>
 
         <form class="search" id="search-form" role="search">
@@ -92,7 +96,15 @@
                 <div class="error" data-error-for="c-note" hidden><img src="images/triangle-alert.png" alt=""><span></span></div>
             </div>
 
-            <label class="verify"><input type="checkbox" id="c-verified"> I've checked this number works</label>
+            <div class="field verify-box">
+                <label class="verify-label" for="c-verified">
+                    <input type="checkbox" id="c-verified">
+                    <div>
+                        <b>Mark as verified</b>
+                        <span class="muted small block">Check this once you've confirmed this number is active and answers in an emergency.</span>
+                    </div>
+                </label>
+            </div>
 
             <div class="error-box error" id="drawer-error" hidden><span></span></div>
 
@@ -107,7 +119,7 @@
         <a href="contacts.html" class="active"><i data-lucide="users"></i>Contacts</a>
         <a href="profile.html"><i data-lucide="user"></i>Profile</a>
         <a href="security.html"><i data-lucide="shield-check"></i>Security</a>
-        <a href="admin.html"><i data-lucide="lock"></i>Admin</a>
+        <a href="admin.html" class="admin-only" hidden><i data-lucide="lock"></i>Admin</a>
     </nav>
     <script src="js/lucide.min.js"></script>
     <script src="js/validate.js"></script>
