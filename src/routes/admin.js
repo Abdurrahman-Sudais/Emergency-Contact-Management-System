@@ -6,12 +6,12 @@ module.exports = function adminRoutes({ store, sessions, now }) {
   const r = express.Router();
   r.use("/admin", requireAdmin(store));
 
-  r.get("/admin", (req, res) => {
+  r.get("/admin", async (req, res) => {
     const q = String(req.query.q || "").trim().slice(0, 100);
     const t = now();
     res.json({
-      stats: store.users.stats(),
-      accounts: store.users.list(q).map((u) => ({
+      stats: await store.users.stats(),
+      accounts: (await store.users.list(q)).map((u) => ({
         id: u.id,
         name: u.name,
         email: u.email,
@@ -20,7 +20,7 @@ module.exports = function adminRoutes({ store, sessions, now }) {
         lastLogin: u.last_login_at,
         isYou: u.id === req.user.id,
       })),
-      log: store.audit.securityEvents(8).map((e) => ({
+      log: (await store.audit.securityEvents(8)).map((e) => ({
         title: EVENT_TITLES[e.event] || e.event,
         who: e.subject_name || e.detail || "Deleted account",
         detail: e.event === "role_changed" ? e.detail : "",
@@ -29,9 +29,9 @@ module.exports = function adminRoutes({ store, sessions, now }) {
     });
   });
 
-  function target(req, res) {
+  async function target(req, res) {
     const id = parseId(req.params.id);
-    const u = id && store.users.byId(id);
+    const u = id && await store.users.byId(id);
     if (!u) {
       res.status(404).json({ error: "That account doesn't exist." });
       return null;
@@ -45,39 +45,39 @@ module.exports = function adminRoutes({ store, sessions, now }) {
 
   const log = (req, event, u, detail = null) => store.audit.log(event, { actorId: req.user.id, subjectId: u.id, detail });
 
-  r.post("/admin/users/:id/role", (req, res) => {
-    const u = target(req, res);
+  r.post("/admin/users/:id/role", async (req, res) => {
+    const u = await target(req, res);
     if (!u) return;
     const role = req.body?.role === "admin" ? "admin" : "user";
     if (role !== u.role) {
-      store.users.setRole(u.id, role);
-      log(req, "role_changed", u, role);
+      await store.users.setRole(u.id, role);
+      await log(req, "role_changed", u, role);
     }
     res.json({ ok: true, message: `${u.name} is now ${role === "admin" ? "an admin" : "a user"}.` });
   });
 
-  r.post("/admin/users/:id/suspend", (req, res) => {
-    const u = target(req, res);
+  r.post("/admin/users/:id/suspend", async (req, res) => {
+    const u = await target(req, res);
     if (!u) return;
-    store.users.setStatus(u.id, "suspended");
-    sessions.endAllFor(u.id);
-    log(req, "suspended", u);
+    await store.users.setStatus(u.id, "suspended");
+    await sessions.endAllFor(u.id);
+    await log(req, "suspended", u);
     res.json({ ok: true, message: `${u.name} is suspended and signed out.` });
   });
 
-  r.post("/admin/users/:id/reinstate", (req, res) => {
-    const u = target(req, res);
+  r.post("/admin/users/:id/reinstate", async (req, res) => {
+    const u = await target(req, res);
     if (!u) return;
-    store.users.setStatus(u.id, "active");
-    log(req, "reinstated", u);
+    await store.users.setStatus(u.id, "active");
+    await log(req, "reinstated", u);
     res.json({ ok: true, message: `${u.name} is reinstated.` });
   });
 
-  r.post("/admin/users/:id/unlock", (req, res) => {
-    const u = target(req, res);
+  r.post("/admin/users/:id/unlock", async (req, res) => {
+    const u = await target(req, res);
     if (!u) return;
-    store.users.unlock(u.id);
-    log(req, "unlocked", u);
+    await store.users.unlock(u.id);
+    await log(req, "unlocked", u);
     res.json({ ok: true, message: `${u.name} is unlocked.` });
   });
 

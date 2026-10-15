@@ -4,7 +4,7 @@ const { createApp } = require("../src/app");
 const { hashPassword } = require("../src/security/passwords");
 
 async function startApp(options = {}) {
-  const db = openDatabase(":memory:");
+  const db = await openDatabase();
   const clock = { now: Date.UTC(2026, 9, 13, 12, 0, 0) };
   const dataKey = crypto.randomBytes(32);
   const app = createApp({ db, dataKey, now: () => clock.now, logErrors: false, ...options });
@@ -17,7 +17,11 @@ async function startApp(options = {}) {
     db,
     clock,
     base,
-    close: () => new Promise((r) => server.close(r)),
+    close: async () => {
+      server.closeAllConnections();
+      await new Promise((r) => server.close(r));
+      await db.close();
+    },
     advance(ms) {
       clock.now += ms;
     },
@@ -25,9 +29,11 @@ async function startApp(options = {}) {
 
     async createUser({ name = "Test User", email, password = "Password!123", role = "user" }) {
       const hash = await hashPassword(password);
-      const r = db.prepare(`INSERT INTO users (name, email, password_hash, role, created_at) VALUES (?, ?, ?, ?, ?)`)
-        .run(name, email, hash, role, clock.now);
-      return Number(r.lastInsertRowid);
+      const row = await db.one(
+        `INSERT INTO users (name, email, password_hash, role, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+        [name, email, hash, role, clock.now]
+      );
+      return row.id;
     },
 
     async signedIn(email, password = "Password!123", opts = {}) {

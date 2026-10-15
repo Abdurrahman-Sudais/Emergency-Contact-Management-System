@@ -4,10 +4,10 @@ function requireUser(req, res, next) {
 }
 
 function requireAdmin(store) {
-  return (req, res, next) => {
+  return async (req, res, next) => {
     if (!req.user) return requireUser(req, res, next);
     if (req.user.role === "admin") return next();
-    store.audit.log("access_denied", { actorId: req.user.id, subjectId: req.user.id, detail: req.path });
+    await store.audit.log("access_denied", { actorId: req.user.id, subjectId: req.user.id, detail: req.path });
     res.status(403).json({ error: "Admins only." });
   };
 }

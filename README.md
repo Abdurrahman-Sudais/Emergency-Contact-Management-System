@@ -20,15 +20,20 @@ src/               ← the server (Node.js + Express)
   app.js             serves public/ and the /api routes; blocks private pages when signed out
   routes/            the API: auth, home, contacts, profile, admin
   security/          password hashing, sessions, CSRF tokens, encryption, headers
-  store.js, db.js    the SQLite database and every query
-tests/             ← 106 automated tests (see TESTING.md)
+  store.js, db.js    the PostgreSQL database and every query
+  start.js           connects to the database and builds the app
+api/index.js       ← entry point when hosted on Vercel
+server.js          ← entry point when run on your computer (or Render)
+tests/             ← 107 automated tests (see TESTING.md)
 ```
 
 The pages are normal HTML files. When one loads, its script asks the server for data (`fetch("/api/contacts")`) and fills the page in. Forms send their data the same way. The server is still needed: password hashing, sessions, role checks and SQL-injection protection have to happen somewhere users can't tamper with, and anyone can edit the JavaScript running in their own browser.
 
 ## Running it
 
-You need **Node.js 24.7 or newer** (it has Argon2 and SQLite built in).
+You need **Node.js 24.7 or newer** (it has Argon2 password hashing built in).
+
+The database is **PostgreSQL**. Online it is Supabase. On your own computer, and in the tests, the app uses PGlite, a real PostgreSQL that runs inside Node with nothing to install. Its data lives in `data/pgdata`.
 
 ```bash
 npm install
@@ -63,29 +68,51 @@ Each one is explained on the in-app **Security** page and proven by tests in `te
 | 02 | Passwords stored only as salted **Argon2id** hashes | `src/security/passwords.js` |
 | 03 | Roles (User/Admin) read from the database on every request | `src/routes/guards.js`, `src/app.js` |
 | 04 | Validation in the browser **and** again on the server, using the same rules; profile photos checked by their real contents, max 2 MB, location data stripped | `public/js/validate.js`, `src/security/images.js` |
-| 05 | SQL injection: every query uses `?` parameters | `src/store.js` |
+| 05 | SQL injection: every query uses `$1, $2…` parameters | `src/store.js` |
 | 06 | XSS: pages insert data with `textContent`; strict Content Security Policy | `public/js/api.js`, `src/security/headers.js` |
 | 07 | Sessions: random 256-bit token, HttpOnly/Secure/SameSite cookie, new ID at login, 15-min idle timeout, CSRF tokens | `src/security/sessions.js`, `csrf.js` |
 | 08 | Access control: every contact query includes the owner's id; attempts on other people's data are logged | `src/routes/contacts.js` |
 | 09 | Medical notes and contact notes encrypted with AES-256-GCM; key kept in `.env`; errors never leak details | `src/security/encryption.js` |
 | 10 | HTTPS forced in production, HSTS and hardening headers on every response | `src/security/headers.js`, `server.js` |
 
-## Deploying to Render
+## Hosting on Vercel + Supabase (free)
 
-The repo includes `render.yaml`, so Render sets most things up itself.
+The database lives on Supabase and the website runs on Vercel. A Supabase project called **incase** already exists, with all five tables created and locked down: row-level security is on with no policies, so Supabase's public API can't read anything and only this server can.
 
-1. Push this code to GitHub.
-2. On [render.com](https://render.com), sign in with GitHub, then click **New → Blueprint** and pick this repository.
-3. Render reads `render.yaml` and creates:
-   - a web service on the **Starter** plan (about $7/month). Paid is needed because only paid plans can have a disk.
-   - a 1 GB disk at `/var/data` where the database lives, so data survives restarts and redeploys.
-   - a random `DATA_KEY`, plus `NODE_ENV=production` and `TRUST_PROXY=1`.
-4. Click **Apply**. After a few minutes the site is live at `https://incase-xxxx.onrender.com` with HTTPS already on.
-5. Make yourself an admin: sign up on the live site, then open the service's **Shell** tab in Render and run
-   `npm run make-admin -- your@email.com`
+### 1. Get the database address from Supabase
+1. Open [supabase.com/dashboard](https://supabase.com/dashboard) → project **incase**.
+2. **Set a database password:** Project Settings → Database → **Reset database password**. Save it somewhere safe.
+3. Click **Connect** (top of the page) → **Transaction pooler**, and copy the URI. It looks like
+   `postgresql://postgres.exilbopdpnvavqjlwbiu:[YOUR-PASSWORD]@aws-0-eu-west-2.pooler.supabase.com:6543/postgres`
+   Replace `[YOUR-PASSWORD]` with the password from step 2.
 
-Don't run `npm run seed` on the live site: the demo passwords are published in this README.
+**Optional test before deploying:** put that address in your local `.env` as `DATABASE_URL=...` and run `npm start`. The app now uses Supabase from your computer. Remove the line afterwards to go back to the local database.
 
-Keep `DATA_KEY` safe. If it is lost or changed, encrypted notes and medical details can no longer be read. Render keeps it under the service's **Environment** tab.
+### 2. Deploy on Vercel
+1. Push the code to GitHub.
+2. On [vercel.com](https://vercel.com), click **Add New → Project**, import the repository, and leave the build settings alone (`vercel.json` sets them).
+3. Under **Environment Variables**, add:
 
-For a free demo instead, change `plan: starter` to `plan: free` and delete the `disk:` section in `render.yaml`. The site works the same, but the free plan has no disk, so all accounts are wiped whenever the app restarts or goes to sleep.
+| Name | Value |
+|---|---|
+| `DATABASE_URL` | the Supabase address from step 1 |
+| `DATA_KEY` | a new key: run `npm run key` and paste what it prints |
+| `NODE_ENV` | `production` |
+
+4. Click **Deploy**. The site is live at `https://<project>.vercel.app`, with HTTPS already on.
+
+### 3. Make yourself an admin
+Sign up on the live site. Then, in Supabase → **SQL Editor**, run:
+```sql
+UPDATE users SET role = 'admin' WHERE lower(email) = lower('your@email.com');
+```
+
+### Good to know
+- **Keep `DATA_KEY` safe.** If it is lost or changed, encrypted notes and medical details can't be read again.
+- **Don't run `npm run seed` against Supabase.** The demo passwords are published in this README.
+- **The free Supabase plan pauses after a week with no visitors.** Nothing is deleted: open the dashboard and click **Restore project**, then wait about a minute. Open the site a day before presenting.
+- **Stricter database encryption check (optional):** download the SSL certificate from Supabase (Project Settings → Database → SSL Configuration) and paste its contents into a `DATABASE_CA_CERT` variable. The app then verifies it is really talking to Supabase.
+
+## Alternative: Render (paid, about $7/month)
+
+`render.yaml` is also included. On [render.com](https://render.com): **New → Blueprint** → pick the repo → **Apply**. Render runs the local PostgreSQL (PGlite) on a 1 GB disk, so Supabase isn't needed. To make an admin, open the service's **Shell** tab and run `npm run make-admin -- your@email.com`.

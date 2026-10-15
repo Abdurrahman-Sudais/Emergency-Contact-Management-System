@@ -111,7 +111,7 @@ describe("Profile", () => {
     await b.post("/api/contacts", contact());
     assert.equal((await b.del("/api/profile", { password: "wrong" })).status, 422);
     assert.equal((await b.del("/api/profile", { password: "Password!123" })).status, 200);
-    assert.equal(t.db.prepare(`SELECT COUNT(*) AS n FROM users WHERE email = 'delete@example.com'`).get().n, 0);
+    assert.equal((await t.db.one(`SELECT COUNT(*) AS n FROM users WHERE email = 'delete@example.com'`)).n, 0);
     assert.equal((await b.get("/api/home")).status, 401);
   });
 
@@ -132,7 +132,7 @@ describe("Admin", () => {
   test("FUN-12 stats, search, unlock and reinstate", async () => {
     const admin = await t.signedIn("boss@example.com", "Password!123", { role: "admin" });
     const id = await t.createUser({ name: "Locked Lola", email: "lola@example.com" });
-    t.db.prepare(`UPDATE users SET locked_until = ? WHERE id = ?`).run(t.clock.now + 600000, id);
+    await t.db.query(`UPDATE users SET locked_until = $1 WHERE id = $2`, [t.clock.now + 600000, id]);
 
     let r = await admin.get("/api/admin?q=lola");
     assert.equal(r.json.accounts.length, 1);

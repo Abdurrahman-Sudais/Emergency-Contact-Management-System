@@ -2,7 +2,7 @@
 
 This plan covers the eight kinds of testing the project requires. Six are automated: run `npm test` to repeat them. Usability and responsive testing need people and devices, so they have step-by-step scripts with spaces for results.
 
-**Latest automated run: 106 tests, 106 passed, 0 failed** (Node.js 24, Windows 11).
+**Latest automated run: 107 tests, 107 passed, 0 failed** (Node.js 24, Windows 11).
 
 | Kind of testing | How | Test IDs | File |
 |---|---|---|---|
@@ -13,9 +13,9 @@ This plan covers the eight kinds of testing the project requires. Six are automa
 | 5. Usability | manual script + automated label check | USE-01 – USE-09, UI-04 | below, `tests/pages.test.js` |
 | 6. Responsive / mobile | manual script + automated checks | RES-01 – RES-08, UI-01, UI-06 | below, `tests/pages.test.js` |
 | 7. Error handling | automated | UI-07 – UI-09, VAL-14, VAL-15, SEC-28 | `tests/pages.test.js` and others |
-| 8. Database | automated | DB-01 – DB-12 | `tests/database.test.js` |
+| 8. Database | automated | DB-01 – DB-13 | `tests/database.test.js` |
 
-Each automated test starts a fresh copy of the app with an empty in-memory database and a fake clock. The clock lets tests check things like "locked for 15 minutes" without waiting. The tests talk to the app over real HTTP, the same way the pages do.
+Each automated test starts a fresh copy of the app with an empty in-memory PostgreSQL database (PGlite, the same database engine Supabase runs) and a fake clock. The clock lets tests check things like "locked for 15 minutes" without waiting. The tests talk to the app over real HTTP, the same way the pages do.
 
 ---
 
@@ -224,9 +224,10 @@ Manual: open each page at each size. In Chrome, use DevTools → device toolbar,
 | DB-04 | Plain-text password stored | Rejected: must be an Argon2id hash |
 | DB-05 | Bad relationship or non-international phone | Rejected |
 | DB-06 | Contact for a user that doesn't exist | Rejected (foreign key) |
-| DB-07 | Delete a user | Their contacts and sessions are deleted too (cascade) |
+| DB-07 | Delete a user | Their contacts, sessions and photo are deleted too (cascade) |
 | DB-08 | Delete contacts from the middle | Positions stay 1..n |
 | DB-09 | Query another user's contact | Nothing returned/changed |
 | DB-10 | Error halfway through a transaction | Nothing saved (rollback) |
 | DB-11 | Encrypted note | Reads back correctly; one flipped bit is detected |
 | DB-12 | Account deleted | Its activity history is gone too |
+| DB-13 | Supabase lock-down | Row-level security is on for every table and Supabase's public API roles have no access |

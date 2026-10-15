@@ -19,11 +19,18 @@ function loadConfig(env = process.env) {
     );
   }
 
+  const databaseUrl = env.DATABASE_URL || null;
+  if (env.VERCEL && !databaseUrl) {
+    throw new Error("DATABASE_URL is missing. On Vercel the app needs the Supabase connection string.");
+  }
+
   return {
     production,
+    databaseUrl,
+    dbDir: env.DB_DIR || path.join("data", "pgdata"),
+    dbCaCert: env.DATABASE_CA_CERT ? env.DATABASE_CA_CERT.replace(/\\n/g, "\n") : null,
     port: Number(env.PORT) || 3000,
     httpsPort: Number(env.HTTPS_PORT) || 3443,
-    dbPath: env.DB_PATH || path.join("data", "incase.db"),
     dataKey,
     tlsKeyFile: env.TLS_KEY_FILE || null,
     tlsCertFile: env.TLS_CERT_FILE || null,

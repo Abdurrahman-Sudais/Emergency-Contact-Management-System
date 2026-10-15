@@ -6,9 +6,9 @@ const { contactJson } = require("./contacts");
 module.exports = function homeRoutes({ store }) {
   const r = express.Router();
 
-  r.get("/home", requireUser, (req, res) => {
+  r.get("/home", requireUser, async (req, res) => {
     const user = req.user;
-    const contacts = store.contacts.listForUser(user.id);
+    const contacts = await store.contacts.listForUser(user.id);
     const medical = store.users.getMedical(user);
     const unverified = contacts.find((c) => !c.verified);
 
@@ -25,12 +25,12 @@ module.exports = function homeRoutes({ store }) {
     res.json({
       contacts: contacts.map(contactJson),
       readiness,
-      activity: store.audit.forUser(user.id, 5).map((e) => ({ at: e.created_at, text: eventText(e) })),
+      activity: (await store.audit.forUser(user.id, 5)).map((e) => ({ at: e.created_at, text: eventText(e) })),
     });
   });
 
-  r.post("/privacy-reviewed", requireUser, (req, res) => {
-    store.users.markPrivacyReviewed(req.user.id);
+  r.post("/privacy-reviewed", requireUser, async (req, res) => {
+    await store.users.markPrivacyReviewed(req.user.id);
     res.json({ ok: true });
   });
 

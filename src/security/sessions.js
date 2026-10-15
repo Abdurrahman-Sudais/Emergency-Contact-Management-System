@@ -26,16 +26,16 @@ function cookieString(name, value, { secure, maxAgeSec } = {}) {
 }
 
 function createSessions(db, now) {
-  const q = (sql) => db.prepare(sql);
-
-  function start(req, res, userId, { persistent = false } = {}) {
+  async function start(req, res, userId, { persistent = false } = {}) {
     const old = req.cookies[COOKIE];
-    if (old) q(`DELETE FROM sessions WHERE id_hash = ?`).run(sha256(old));
+    if (old) await db.query(`DELETE FROM sessions WHERE id_hash = $1`, [sha256(old)]);
 
     const raw = token();
     const t = now();
-    q(`INSERT INTO sessions (id_hash, user_id, csrf_token, persistent, created_at, last_seen_at) VALUES (?, ?, ?, ?, ?, ?)`)
-      .run(sha256(raw), userId, token(), persistent ? 1 : 0, t, t);
+    await db.query(
+      `INSERT INTO sessions (id_hash, user_id, csrf_token, persistent, created_at, last_seen_at) VALUES ($1, $2, $3, $4, $5, $5)`,
+      [sha256(raw), userId, token(), persistent ? 1 : 0, t]
+    );
     res.append("Set-Cookie", cookieString(COOKIE, raw, {
       secure: req.secure,
       maxAgeSec: persistent ? ABSOLUTE_MS / 1000 : undefined,
@@ -43,18 +43,18 @@ function createSessions(db, now) {
     return raw;
   }
 
-  function end(req, res) {
+  async function end(req, res) {
     const raw = req.cookies[COOKIE];
-    if (raw) q(`DELETE FROM sessions WHERE id_hash = ?`).run(sha256(raw));
+    if (raw) await db.query(`DELETE FROM sessions WHERE id_hash = $1`, [sha256(raw)]);
     res.append("Set-Cookie", cookieString(COOKIE, "", { secure: req.secure, maxAgeSec: 0 }));
   }
 
   function endAllFor(userId) {
-    q(`DELETE FROM sessions WHERE user_id = ?`).run(userId);
+    return db.query(`DELETE FROM sessions WHERE user_id = $1`, [userId]);
   }
 
-  function middleware(store) {
-    return (req, res, next) => {
+  function middleware() {
+    return async (req, res, next) => {
       req.cookies = parseCookies(req.headers.cookie);
       req.session = null;
       req.user = null;
@@ -63,21 +63,27 @@ function createSessions(db, now) {
       if (!raw) return next();
 
       const idHash = sha256(raw);
-      const s = q(`SELECT * FROM sessions WHERE id_hash = ?`).get(idHash);
+      const row = await db.one(
+        `SELECT s.id_hash, s.csrf_token, s.persistent, s.created_at AS session_created_at, s.last_seen_at, u.*
+         FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id_hash = $1`,
+        [idHash]
+      );
       const t = now();
-      const user = s && store.users.byId(s.user_id);
 
-      if (!s || !user || user.status !== "active" || t - s.last_seen_at > IDLE_MS || t - s.created_at > ABSOLUTE_MS) {
-        if (s) {
-          q(`DELETE FROM sessions WHERE id_hash = ?`).run(idHash);
+      if (!row || row.status !== "active" || t - row.last_seen_at > IDLE_MS || t - row.session_created_at > ABSOLUTE_MS) {
+        if (row) {
+          await db.query(`DELETE FROM sessions WHERE id_hash = $1`, [idHash]);
           req.sessionExpired = true;
         }
         res.append("Set-Cookie", cookieString(COOKIE, "", { secure: req.secure, maxAgeSec: 0 }));
         return next();
       }
 
-      q(`UPDATE sessions SET last_seen_at = ? WHERE id_hash = ?`).run(t, idHash);
-      req.session = s;
+      if (t - row.last_seen_at > 60 * 1000) {
+        await db.query(`UPDATE sessions SET last_seen_at = $1 WHERE id_hash = $2`, [t, idHash]);
+      }
+      const { id_hash, csrf_token, persistent, session_created_at, last_seen_at, ...user } = row;
+      req.session = { id_hash, csrf_token, persistent, created_at: session_created_at, last_seen_at, user_id: user.id };
       req.user = user;
       next();
     };

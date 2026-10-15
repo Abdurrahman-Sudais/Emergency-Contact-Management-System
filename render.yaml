@@ -13,8 +13,8 @@ services:
         value: production
       - key: TRUST_PROXY
         value: "1"
-      - key: DB_PATH
-        value: /var/data/incase.db
+      - key: DB_DIR
+        value: /var/data/pgdata
       - key: DATA_KEY
         generateValue: true
     disk:

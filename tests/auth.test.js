@@ -67,15 +67,15 @@ describe("Login", () => {
     assert.equal((await b.post("/api/login", { email: "lock@example.com", password: "Right!pw123" })).status, 200);
   });
 
-  test("AUTH-07 the lockout is recorded in the audit log", () => {
-    const row = t.db.prepare(`SELECT COUNT(*) AS n FROM audit_log a JOIN users u ON u.id = a.subject_id
-                              WHERE u.email = 'lock@example.com' AND a.event = 'account_locked'`).get();
+  test("AUTH-07 the lockout is recorded in the audit log", async () => {
+    const row = (await t.db.one(`SELECT COUNT(*) AS n FROM audit_log a JOIN users u ON u.id = a.subject_id
+                              WHERE u.email = 'lock@example.com' AND a.event = 'account_locked'`));
     assert.equal(row.n, 1);
   });
 
   test("AUTH-08 suspended accounts can't log in", async () => {
     const id = await t.createUser({ name: "Gone Away", email: "suspended@example.com", password: "Right!pw123" });
-    t.db.prepare(`UPDATE users SET status = 'suspended' WHERE id = ?`).run(id);
+    await t.db.query(`UPDATE users SET status = 'suspended' WHERE id = $1`, [id]);
     const r = await t.browser().post("/api/login", { email: "suspended@example.com", password: "Right!pw123" });
     assert.equal(r.status, 403);
   });

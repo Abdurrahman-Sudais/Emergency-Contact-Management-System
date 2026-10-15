@@ -24,9 +24,9 @@ function createApp({ db, dataKey, now = Date.now, forceHttps = false, trustProxy
   app.get("/healthz", (req, res) => res.type("text").send("ok"));
   app.use(securityHeaders({ forceHttps }));
   app.use(express.json({ limit: "20kb" }));
-  app.use(sessions.middleware(store));
+  app.use(sessions.middleware());
 
-  app.use((req, res, next) => {
+  app.use(async (req, res, next) => {
     if (req.method !== "GET") return next();
     const page = req.path === "/" ? "index" : req.path.replace(/^\//, "").replace(/\.html$/, "");
 
@@ -39,7 +39,7 @@ function createApp({ db, dataKey, now = Date.now, forceHttps = false, trustProxy
         return res.redirect(`/login.html?next=${encodeURIComponent(req.originalUrl)}${expired}`);
       }
       if (page === "admin" && req.user.role !== "admin") {
-        store.audit.log("access_denied", { actorId: req.user.id, subjectId: req.user.id, detail: "admin page" });
+        await store.audit.log("access_denied", { actorId: req.user.id, subjectId: req.user.id, detail: "admin page" });
         return res.redirect("/home.html?denied=1");
       }
     }

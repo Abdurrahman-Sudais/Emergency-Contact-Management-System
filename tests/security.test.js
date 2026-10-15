@@ -10,7 +10,7 @@ describe("02 Password hashing", () => {
   test("SEC-01 only a salted Argon2id hash is stored, never the password", async () => {
     await t.browser().post("/api/register", { name: "Hash Check", email: "hash@example.com", password: "Plain!text99" });
     await t.browser().post("/api/register", { name: "Hash Twin", email: "twin@example.com", password: "Plain!text99" });
-    const rows = t.db.prepare(`SELECT password_hash FROM users WHERE email IN ('hash@example.com', 'twin@example.com')`).all();
+    const rows = (await t.db.all(`SELECT password_hash FROM users WHERE email IN ('hash@example.com', 'twin@example.com')`));
     for (const r of rows) {
       assert.match(r.password_hash, /^\$argon2id\$v=19\$m=19456,t=2,p=1\$/);
       assert.ok(!r.password_hash.includes("Plain!text99"));
@@ -29,16 +29,16 @@ describe("03 Role-based access", () => {
     assert.equal((await b.post("/api/admin/users/1/role", { role: "admin" })).status, 403);
   });
 
-  test("SEC-03 the blocked attempt is written to the audit log", () => {
-    const n = t.db.prepare(`SELECT COUNT(*) AS n FROM audit_log a JOIN users u ON u.id = a.subject_id
-                            WHERE u.email = 'user1@example.com' AND a.event = 'access_denied'`).get().n;
+  test("SEC-03 the blocked attempt is written to the audit log", async () => {
+    const n = (await t.db.one(`SELECT COUNT(*) AS n FROM audit_log a JOIN users u ON u.id = a.subject_id
+                            WHERE u.email = 'user1@example.com' AND a.event = 'access_denied'`)).n;
     assert.ok(n >= 2);
   });
 
   test("SEC-04 an admin can change roles, and the change applies on the very next request", async () => {
     const admin = await t.signedIn("admin@example.com", "Password!123", { role: "admin" });
     const user = await t.signedIn("promote@example.com");
-    const id = t.db.prepare(`SELECT id FROM users WHERE email = 'promote@example.com'`).get().id;
+    const id = (await t.db.one(`SELECT id FROM users WHERE email = 'promote@example.com'`)).id;
 
     assert.equal((await user.get("/api/admin")).status, 403);
     assert.equal((await admin.post(`/api/admin/users/${id}/role`, { role: "admin" })).status, 200);
@@ -50,7 +50,7 @@ describe("03 Role-based access", () => {
   test("SEC-05 suspending an account signs that person out immediately", async () => {
     const admin = await t.signedIn("admin2@example.com", "Password!123", { role: "admin" });
     const user = await t.signedIn("bye@example.com");
-    const id = t.db.prepare(`SELECT id FROM users WHERE email = 'bye@example.com'`).get().id;
+    const id = (await t.db.one(`SELECT id FROM users WHERE email = 'bye@example.com'`)).id;
     assert.equal((await user.get("/api/home")).status, 200);
     assert.equal((await admin.post(`/api/admin/users/${id}/suspend`, {})).status, 200);
     assert.equal((await user.get("/api/home")).status, 401);
@@ -91,7 +91,7 @@ describe("05 SQL injection", () => {
       assert.equal(r.status, 200, q);
       assert.equal(r.json.contacts.length, 0, `"${q}" must not match everything`);
     }
-    assert.ok(t.db.prepare(`SELECT COUNT(*) AS n FROM contacts`).get().n > 0, "contacts table still exists");
+    assert.ok((await t.db.one(`SELECT COUNT(*) AS n FROM contacts`)).n > 0, "contacts table still exists");
   });
 
   test("SEC-10 a contact name with SQL in it is stored literally", async () => {
@@ -99,7 +99,7 @@ describe("05 SQL injection", () => {
     const r = await b.post("/api/contacts", contact({ label: "x'); DELETE FROM users; --" }));
     assert.equal(r.status, 201);
     assert.equal(r.json.contact.label, "x'); DELETE FROM users; --");
-    assert.ok(t.db.prepare(`SELECT COUNT(*) AS n FROM users`).get().n > 1);
+    assert.ok((await t.db.one(`SELECT COUNT(*) AS n FROM users`)).n > 1);
   });
 });
 
@@ -113,7 +113,7 @@ describe("06 Cross-site scripting", () => {
     assert.equal(r.json.contacts[0].note, payload);
   });
 
-  test("SEC-12 the page scripts insert data with textContent, never innerHTML", () => {
+  test("SEC-12 the page scripts insert data with textContent, never innerHTML", async () => {
     const fs = require("node:fs");
     const path = require("node:path");
     const dir = path.join(__dirname, "..", "public", "js");
@@ -167,7 +167,7 @@ describe("07 Session management", () => {
 
   test("SEC-17 the database stores only a hash of the session token", async () => {
     const b = await t.signedIn("sidhash@example.com");
-    const rows = t.db.prepare(`SELECT id_hash FROM sessions`).all();
+    const rows = (await t.db.all(`SELECT id_hash FROM sessions`));
     assert.ok(rows.every((r) => r.id_hash !== b.cookies.sid));
     assert.ok(rows.every((r) => /^[0-9a-f]{64}$/.test(r.id_hash)));
   });
@@ -249,9 +249,9 @@ describe("08 Access-control checks", () => {
     assert.deepEqual(theirs.json, missing.json);
   });
 
-  test("SEC-25 the attempt is written to the audit log", () => {
-    const n = t.db.prepare(`SELECT COUNT(*) AS n FROM audit_log a JOIN users u ON u.id = a.subject_id
-                            WHERE u.email = 'other@example.com' AND a.event = 'access_denied'`).get().n;
+  test("SEC-25 the attempt is written to the audit log", async () => {
+    const n = (await t.db.one(`SELECT COUNT(*) AS n FROM audit_log a JOIN users u ON u.id = a.subject_id
+                            WHERE u.email = 'other@example.com' AND a.event = 'access_denied'`)).n;
     assert.ok(n >= 3);
   });
 });
@@ -262,10 +262,10 @@ describe("09 Sensitive information", () => {
     await b.put("/api/profile/medical", { bloodGroup: "O negative", allergies: "penicillin" });
     await b.post("/api/contacts", contact({ note: "Has a spare key" }));
 
-    const user = t.db.prepare(`SELECT medical_enc FROM users WHERE email = 'medical@example.com'`).get();
+    const user = (await t.db.one(`SELECT medical_enc FROM users WHERE email = 'medical@example.com'`));
     assert.match(user.medical_enc, /^v1:/);
     assert.ok(!user.medical_enc.includes("penicillin"));
-    const c = t.db.prepare(`SELECT note_enc FROM contacts WHERE note_enc IS NOT NULL ORDER BY id DESC LIMIT 1`).get();
+    const c = (await t.db.one(`SELECT note_enc FROM contacts WHERE note_enc IS NOT NULL ORDER BY id DESC LIMIT 1`));
     assert.ok(!c.note_enc.includes("spare key"));
 
     assert.equal((await b.get("/api/profile")).json.medical.allergies, "penicillin");
@@ -288,7 +288,7 @@ describe("09 Sensitive information", () => {
   });
 
   test("SEC-29 server code and secrets can't be downloaded", async () => {
-    for (const path of ["/.env", "/server.js", "/src/app.js", "/package.json", "/data/incase.db", "/../.env"]) {
+    for (const path of ["/.env", "/server.js", "/src/app.js", "/package.json", "/data/pgdata/PG_VERSION", "/../.env"]) {
       assert.equal((await t.browser().get(path)).status, 404, path);
     }
   });

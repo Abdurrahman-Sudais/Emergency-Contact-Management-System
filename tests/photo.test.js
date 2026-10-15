@@ -62,8 +62,8 @@ describe("Profile photos", () => {
     const b = await t.signedIn("exif@example.com");
     const original = jpegWithExif("GPS-LAT-6.5244-LON-3.3792");
     assert.equal((await upload(b, original, "image/jpeg")).status, 200);
-    const id = t.db.prepare(`SELECT id FROM users WHERE email = 'exif@example.com'`).get().id;
-    const stored = Buffer.from(t.db.prepare(`SELECT data FROM photos WHERE user_id = ?`).get(id).data);
+    const id = (await t.db.one(`SELECT id FROM users WHERE email = 'exif@example.com'`)).id;
+    const stored = Buffer.from((await t.db.one(`SELECT data FROM photos WHERE user_id = $1`, [id])).data);
     assert.ok(!stored.includes("GPS-LAT"));
     assert.ok(stored.length < original.length);
     assert.deepEqual([...stored.subarray(0, 2)], [0xff, 0xd8]);
@@ -72,8 +72,8 @@ describe("Profile photos", () => {
   test("PHOTO-03 text hidden inside PNG files is removed", async () => {
     const b = await t.signedIn("pngtext@example.com");
     assert.equal((await upload(b, pngWithText("secret-note"))).status, 200);
-    const id = t.db.prepare(`SELECT id FROM users WHERE email = 'pngtext@example.com'`).get().id;
-    const stored = Buffer.from(t.db.prepare(`SELECT data FROM photos WHERE user_id = ?`).get(id).data);
+    const id = (await t.db.one(`SELECT id FROM users WHERE email = 'pngtext@example.com'`)).id;
+    const stored = Buffer.from((await t.db.one(`SELECT data FROM photos WHERE user_id = $1`, [id])).data);
     assert.ok(!stored.includes("secret-note"));
   });
 
@@ -140,8 +140,8 @@ describe("Profile photos", () => {
     assert.equal((await b.get("/api/profile/photo")).status, 404);
 
     await upload(b, TINY_PNG);
-    const id = t.db.prepare(`SELECT id FROM users WHERE email = 'remove-photo@example.com'`).get().id;
+    const id = (await t.db.one(`SELECT id FROM users WHERE email = 'remove-photo@example.com'`)).id;
     await b.del("/api/profile", { password: "Password!123" });
-    assert.equal(t.db.prepare(`SELECT COUNT(*) AS n FROM photos WHERE user_id = ?`).get(id).n, 0);
+    assert.equal((await t.db.one(`SELECT COUNT(*) AS n FROM photos WHERE user_id = $1`, [id])).n, 0);
   });
 });

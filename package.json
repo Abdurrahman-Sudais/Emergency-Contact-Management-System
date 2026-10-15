@@ -5,7 +5,7 @@
   "private": true,
   "main": "server.js",
   "engines": {
-    "node": ">=24.7"
+    "node": "24.x"
   },
   "scripts": {
     "setup": "node scripts/setup.js",
@@ -14,9 +14,12 @@
     "seed": "node --env-file-if-exists=.env scripts/seed.js",
     "make-admin": "node --env-file-if-exists=.env scripts/make-admin.js",
     "cert": "node scripts/make-cert.js",
-    "test": "node --test --test-reporter=spec \"tests/**/*.test.js\""
+    "test": "node --test --test-reporter=spec \"tests/**/*.test.js\"",
+    "key": "node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
   },
   "dependencies": {
-    "express": "^5.3.0"
+    "@electric-sql/pglite": "^0.3.16",
+    "express": "^5.3.0",
+    "pg": "^8.23.1"
   }
 }
