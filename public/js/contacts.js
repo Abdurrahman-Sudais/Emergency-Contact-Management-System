@@ -64,8 +64,52 @@
       ]));
     }
 
+    var draggedEl = null;
+    var touchDraggingEl = null;
+
+    function clearDragStyles() {
+      list.querySelectorAll(".list-row").forEach(function (r) {
+        r.classList.remove("drag-over-above", "drag-over-below");
+      });
+    }
+
+    function saveNewOrder() {
+      var rows = list.querySelectorAll(".list-row[data-id]");
+      var ids = [];
+      rows.forEach(function (r, index) {
+        var id = parseInt(r.getAttribute("data-id"), 10);
+        if (id) ids.push(id);
+        var numEl = r.querySelector(".order-col .num");
+        if (numEl) numEl.textContent = InCase.pad2(index + 1);
+        var up = r.querySelector(".order-btns .order-btn:first-child");
+        var down = r.querySelector(".order-btns .order-btn:last-child");
+        if (up) up.disabled = index === 0;
+        if (down) down.disabled = index === rows.length - 1;
+      });
+
+      if (!ids.length) return;
+      InCase.api("POST", "/api/contacts/reorder", { ids: ids }).then(function () {
+        message("Call priority order updated.");
+      }).catch(function (err) {
+        message(err.message);
+        load();
+      });
+    }
+
     contacts.forEach(function (c) {
       var role = c.label || InCase.RELATIONSHIPS[c.relationship];
+
+      var dragHandle = el("span", {
+        className: "drag-handle",
+        title: "Drag to reorder call priority",
+        "aria-label": "Drag " + c.name + " to reorder",
+      }, [
+        el("span", { className: "grip-dots" }, [
+          el("span", {}), el("span", {}),
+          el("span", {}), el("span", {}),
+          el("span", {}), el("span", {}),
+        ])
+      ]);
 
       var upBtn = el("button", {
         type: "button",
@@ -106,7 +150,12 @@
         verifyEl.addEventListener("click", function () { verifyContact(c); });
       }
 
-      list.appendChild(el("div", { className: "list-row" }, [
+      var row = el("div", {
+        className: "list-row draggable-row",
+        draggable: "true",
+        dataset: { id: String(c.id) },
+      }, [
+        dragHandle,
         orderCol,
         el("span", { className: "avatar" }, [InCase.initials(c.name)]),
         el("div", { className: "who" }, [
@@ -120,7 +169,97 @@
           smallButton("Edit", "pencil", function () { openEdit(c); }),
           smallButton("Delete", "trash-2", function () { remove(c); }),
         ]),
-      ]));
+      ]);
+
+      // HTML5 Drag and drop
+      row.addEventListener("dragstart", function (e) {
+        draggedEl = row;
+        row.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
+        try { e.dataTransfer.setData("text/plain", String(c.id)); } catch (err) {}
+      });
+
+      row.addEventListener("dragend", function () {
+        row.classList.remove("dragging");
+        clearDragStyles();
+        draggedEl = null;
+      });
+
+      row.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        if (!draggedEl || draggedEl === row) return;
+        e.dataTransfer.dropEffect = "move";
+        var rect = row.getBoundingClientRect();
+        if (e.clientY < rect.top + rect.height / 2) {
+          row.classList.add("drag-over-above");
+          row.classList.remove("drag-over-below");
+        } else {
+          row.classList.add("drag-over-below");
+          row.classList.remove("drag-over-above");
+        }
+      });
+
+      row.addEventListener("dragleave", function () {
+        row.classList.remove("drag-over-above", "drag-over-below");
+      });
+
+      row.addEventListener("drop", function (e) {
+        e.preventDefault();
+        if (!draggedEl || draggedEl === row) return;
+        var rect = row.getBoundingClientRect();
+        if (e.clientY < rect.top + rect.height / 2) {
+          list.insertBefore(draggedEl, row);
+        } else {
+          list.insertBefore(draggedEl, row.nextSibling);
+        }
+        clearDragStyles();
+        saveNewOrder();
+      });
+
+      // Mobile touch drag handle
+      dragHandle.addEventListener("touchstart", function (e) {
+        if (e.touches.length !== 1) return;
+        touchDraggingEl = row;
+        row.classList.add("touch-dragging");
+      }, { passive: true });
+
+      dragHandle.addEventListener("touchmove", function (e) {
+        if (!touchDraggingEl || e.touches.length !== 1) return;
+        if (e.cancelable) e.preventDefault();
+        var clientY = e.touches[0].clientY;
+        var element = document.elementFromPoint(e.touches[0].clientX, clientY);
+        var targetRow = element ? element.closest(".list-row") : null;
+        clearDragStyles();
+        if (targetRow && targetRow !== touchDraggingEl) {
+          var rect = targetRow.getBoundingClientRect();
+          if (clientY < rect.top + rect.height / 2) {
+            targetRow.classList.add("drag-over-above");
+          } else {
+            targetRow.classList.add("drag-over-below");
+          }
+        }
+      }, { passive: false });
+
+      dragHandle.addEventListener("touchend", function (e) {
+        if (!touchDraggingEl) return;
+        var clientY = e.changedTouches[0].clientY;
+        var element = document.elementFromPoint(e.changedTouches[0].clientX, clientY);
+        var targetRow = element ? element.closest(".list-row") : null;
+        if (targetRow && targetRow !== touchDraggingEl) {
+          var rect = targetRow.getBoundingClientRect();
+          if (clientY < rect.top + rect.height / 2) {
+            list.insertBefore(touchDraggingEl, targetRow);
+          } else {
+            list.insertBefore(touchDraggingEl, targetRow.nextSibling);
+          }
+          saveNewOrder();
+        }
+        touchDraggingEl.classList.remove("touch-dragging");
+        clearDragStyles();
+        touchDraggingEl = null;
+      }, { passive: true });
+
+      list.appendChild(row);
     });
     if (window.lucide) lucide.createIcons();
   }

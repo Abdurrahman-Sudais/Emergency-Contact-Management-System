@@ -159,6 +159,19 @@ function createStore(db, cipher, now) {
         return other.position;
       });
     },
+
+    reorder(userId, ids) {
+      return inTx(async (tx) => {
+        const rows = await tx.all(`SELECT id FROM contacts WHERE user_id = $1`, [userId]);
+        const validIds = new Set(rows.map((r) => r.id));
+        const filtered = ids.filter((id) => validIds.has(id));
+        for (let i = 0; i < filtered.length; i++) {
+          await tx.query(`UPDATE contacts SET position = $1 WHERE id = $2 AND user_id = $3`, [i + 1, filtered[i], userId]);
+        }
+        await tx.query(`UPDATE users SET order_set = 1 WHERE id = $1`, [userId]);
+        return true;
+      });
+    },
   };
 
   function decryptContact(row) {

@@ -74,6 +74,16 @@ function contactRoutes({ store }) {
     res.json({ position: pos || c.position });
   });
 
+  r.post("/contacts/reorder", async (req, res) => {
+    const ids = Array.isArray(req.body?.ids) ? req.body.ids.map(parseId).filter(Boolean) : [];
+    if (!ids.length) return res.status(400).json({ error: "Invalid contact list." });
+    await store.contacts.reorder(req.user.id, ids);
+    await store.audit.log("order_changed", {
+      actorId: req.user.id, subjectId: req.user.id, detail: "reordered contacts",
+    });
+    res.json({ ok: true });
+  });
+
   r.delete("/contacts/:id", async (req, res) => {
     const c = await ownContact(req, res);
     if (!c) return;
