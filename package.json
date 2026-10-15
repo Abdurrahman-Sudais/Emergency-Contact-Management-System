@@ -15,6 +15,7 @@
     "make-admin": "node --env-file-if-exists=.env scripts/make-admin.js",
     "cert": "node scripts/make-cert.js",
     "test": "node --test --test-reporter=spec \"tests/**/*.test.js\"",
+    "build": "node scripts/build.js",
     "key": "node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
   },
   "dependencies": {

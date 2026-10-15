@@ -1,7 +1,7 @@
 {
   "framework": null,
   "installCommand": "npm ci",
-  "buildCommand": "node -e \"require('fs').mkdirSync('vercel-out',{recursive:true});require('fs').writeFileSync('vercel-out/robots.txt','User-agent: *\nAllow: /\n')\"",
+  "buildCommand": "node scripts/build.js",
   "outputDirectory": "vercel-out",
   "functions": {
     "api/index.js": {
