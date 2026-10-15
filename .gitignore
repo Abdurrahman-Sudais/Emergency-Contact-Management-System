@@ -6,3 +6,4 @@ certs/
 
 vercel-out/
 .vercel/
+supabase/.temp/

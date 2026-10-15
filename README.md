@@ -83,7 +83,7 @@ The database lives on Supabase and the website runs on Vercel. A Supabase projec
 1. Open [supabase.com/dashboard](https://supabase.com/dashboard) → project **incase**.
 2. **Set a database password:** Project Settings → Database → **Reset database password**. Save it somewhere safe.
 3. Click **Connect** (top of the page) → **Transaction pooler**, and copy the URI. It looks like
-   `postgresql://postgres.exilbopdpnvavqjlwbiu:[YOUR-PASSWORD]@aws-0-eu-west-2.pooler.supabase.com:6543/postgres`
+   `postgresql://postgres.zbyqmzorlgcawmwrumli:[YOUR-PASSWORD]@aws-0-eu-west-2.pooler.supabase.com:6543/postgres`
    Replace `[YOUR-PASSWORD]` with the password from step 2.
 
 **Optional test before deploying:** put that address in your local `.env` as `DATABASE_URL=...` and run `npm start`. The app now uses Supabase from your computer. Remove the line afterwards to go back to the local database.
