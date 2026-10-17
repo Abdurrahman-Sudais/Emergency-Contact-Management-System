@@ -10,6 +10,7 @@ function eventText(e) {
     case "contact_deleted": return `${d} removed`;
     case "contact_verified": return `${d} verified`;
     case "order_changed": return `Order changed: ${d}`;
+    case "order_rearranged": return "Call order rearranged";
     case "profile_updated": return "Profile details updated";
     case "medical_updated": return "Medical notes updated";
     case "password_changed": return "Password changed";

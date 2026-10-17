@@ -75,13 +75,24 @@ function contactRoutes({ store }) {
   });
 
   r.post("/contacts/reorder", async (req, res) => {
-    const ids = Array.isArray(req.body?.ids) ? req.body.ids.map(parseId).filter(Boolean) : [];
-    if (!ids.length) return res.status(400).json({ error: "Invalid contact list." });
-    await store.contacts.reorder(req.user.id, ids);
-    await store.audit.log("order_changed", {
-      actorId: req.user.id, subjectId: req.user.id, detail: "reordered contacts",
-    });
+    const raw = Array.isArray(req.body?.ids) ? req.body.ids : [];
+    const ids = raw.map(parseId);
+    if (!ids.length || ids.some((id) => !id)) return res.status(400).json({ error: "Invalid contact list." });
+    if (!(await store.contacts.reorder(req.user.id, ids))) {
+      return res.status(422).json({ error: "The order must include every one of your contacts exactly once. Clear the search and filters, then try again." });
+    }
+    await store.audit.log("order_rearranged", { actorId: req.user.id, subjectId: req.user.id });
     res.json({ ok: true });
+  });
+
+  r.post("/contacts/:id/verify", async (req, res) => {
+    const c = await ownContact(req, res);
+    if (!c) return;
+    if (!c.verified) {
+      await store.contacts.markVerified(req.user.id, c.id);
+      await store.audit.log("contact_verified", { actorId: req.user.id, subjectId: req.user.id, detail: c.name });
+    }
+    res.json({ contact: contactJson(await store.contacts.get(req.user.id, c.id)) });
   });
 
   r.delete("/contacts/:id", async (req, res) => {

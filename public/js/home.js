@@ -31,35 +31,31 @@
       $("hero-meta").textContent = roleOf(first) + " · " + InCaseValidate.formatPhone(first.phone);
       $("hero-call").href = "tel:" + first.phone;
       $("hero-call").querySelector("span").textContent = "Call " + InCase.firstName(first.name);
-      if (!first.verified) {
-        $("hero-badge").className = "badge-verify hero-badge-verify";
-        $("hero-badge").textContent = "";
-        $("hero-badge").appendChild(el("img", { src: "images/check.png", alt: "" }));
-        $("hero-badge").appendChild(document.createTextNode(" Needs review · Tap to verify"));
-        $("hero-badge").title = "Tap to verify " + first.name + "'s number";
-        $("hero-badge").setAttribute("role", "button");
-        $("hero-badge").setAttribute("tabindex", "0");
-        $("hero-badge").onclick = function () {
-          var updated = {
-            name: first.name,
-            phone: first.phone,
-            relationship: first.relationship,
-            label: first.label || "",
-            note: first.note || "",
-            verified: true
-          };
-          InCase.api("PUT", "/api/contacts/" + first.id, updated).then(function () {
-            location.reload();
-          });
-        };
+      var badge = $("hero-badge");
+      if (first.verified) {
+        badge.className = "badge green";
+        badge.textContent = "";
+        badge.appendChild(el("img", { src: "images/check.png", alt: "" }));
+        badge.appendChild(document.createTextNode(" Verified"));
       } else {
-        $("hero-badge").className = "badge green";
-        $("hero-badge").textContent = "";
-        $("hero-badge").appendChild(el("img", { src: "images/check.png", alt: "" }));
-        $("hero-badge").appendChild(document.createTextNode(" Verified"));
-        $("hero-badge").onclick = null;
-        $("hero-badge").removeAttribute("role");
-        $("hero-badge").removeAttribute("tabindex");
+        var verifyBtn = el("button", {
+          type: "button",
+          id: "hero-badge",
+          className: "badge-verify hero-badge-verify",
+          title: "Mark " + first.name + "'s number as checked",
+        }, ["Needs review · Verify"]);
+        verifyBtn.addEventListener("click", function () {
+          var question = "Have you called " + first.name + " on " + InCaseValidate.formatPhone(first.phone) + " and confirmed the number works?";
+          if (!confirm(question)) return;
+          verifyBtn.disabled = true;
+          InCase.api("POST", "/api/contacts/" + first.id + "/verify", {}).then(function () {
+            location.reload();
+          }).catch(function (err) {
+            verifyBtn.disabled = false;
+            alert(err.message);
+          });
+        });
+        badge.replaceWith(verifyBtn);
       }
 
       var list = $("side-list");

@@ -2,17 +2,17 @@
 
 This plan covers the eight kinds of testing the project requires. Six are automated: run `npm test` to repeat them. Usability and responsive testing need people and devices, so they have step-by-step scripts with spaces for results.
 
-**Latest automated run: 107 tests, 107 passed, 0 failed** (Node.js 24, Windows 11).
+**Latest automated run: 116 tests, 116 passed, 0 failed** (Node.js 24, Windows 11).
 
 | Kind of testing | How | Test IDs | File |
 |---|---|---|---|
-| 1. Functional | automated | FUN-01 – FUN-12 | `tests/functional.test.js` |
+| 1. Functional | automated | FUN-01 – FUN-16 | `tests/functional.test.js`, `tests/features.test.js` |
 | 2. Login / registration | automated | AUTH-01 – AUTH-14 | `tests/auth.test.js` |
 | 3. Form validation | automated | VAL-01 – VAL-15 | `tests/validation.test.js` |
-| 4. Security | automated | SEC-01 – SEC-32, PHOTO-01 – PHOTO-12 | `tests/security.test.js`, `tests/photo.test.js` |
+| 4. Security | automated | SEC-01 – SEC-35, PHOTO-01 – PHOTO-12 | `tests/security.test.js`, `tests/photo.test.js`, `tests/features.test.js` |
 | 5. Usability | manual script + automated label check | USE-01 – USE-09, UI-04 | below, `tests/pages.test.js` |
 | 6. Responsive / mobile | manual script + automated checks | RES-01 – RES-08, UI-01, UI-06 | below, `tests/pages.test.js` |
-| 7. Error handling | automated | UI-07 – UI-09, VAL-14, VAL-15, SEC-28 | `tests/pages.test.js` and others |
+| 7. Error handling | automated | UI-07 – UI-11, VAL-14, VAL-15, SEC-28 | `tests/pages.test.js`, `tests/features.test.js` and others |
 | 8. Database | automated | DB-01 – DB-13 | `tests/database.test.js` |
 
 Each automated test starts a fresh copy of the app with an empty in-memory PostgreSQL database (PGlite, the same database engine Supabase runs) and a fake clock. The clock lets tests check things like "locked for 15 minutes" without waiting. The tests talk to the app over real HTTP, the same way the pages do.
@@ -213,6 +213,22 @@ Manual: open each page at each size. In Chrome, use DevTools → device toolbar,
 | VAL-15 | Broken JSON | 400 with a plain message |
 | SEC-28 | Any error | No stack trace or internal detail |
 | (manual) | Stop the server, then click Save in the browser | Message shown, page doesn't freeze | |
+
+### Drag-and-drop order, one-tap verify and the tour
+
+| ID | What is tested | Expected result |
+|---|---|---|
+| FUN-13 | Drag contacts into a new order (full list) | New order saved; activity says "Call order rearranged"; "Set the call order" ticked |
+| FUN-14 | Reorder sent from a filtered view (only some contacts) | Refused; the order doesn't change |
+| FUN-15 | Duplicate, missing or non-numeric ids | Refused |
+| FUN-16 | Verify a number | Only "verified" changes; label and note untouched; logged once even if tapped twice |
+| SEC-33 | Another user's contact ids slipped into a reorder | Refused; the owner's order is unchanged |
+| SEC-34 | Verify another user's contact | 404; stays unverified |
+| SEC-35 | Verify without the anti-CSRF token | 403 |
+| UI-10 | Open `step2.html` / `step3.html` directly | The single tour page loads at that step |
+| UI-11 | Tour wording | Mentions no features the app doesn't have |
+
+Manual check: on the Contacts page, turn on a filter or type in search. The drag handles disappear and a hint says to clear them first. Tapping "Needs review · Verify" asks "Have you called … and confirmed the number works?" first.
 
 ## 8. Database testing
 

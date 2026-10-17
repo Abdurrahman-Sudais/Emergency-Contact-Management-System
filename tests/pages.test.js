@@ -6,6 +6,7 @@ const { startApp } = require("./helpers");
 
 const PUBLIC = path.join(__dirname, "..", "public");
 const pages = fs.readdirSync(PUBLIC).filter((f) => f.endsWith(".html"));
+const TOUR_ALIASES = ["step2.html", "step3.html"];
 
 describe("HTML pages", () => {
   test("UI-01 every page has the mobile viewport tag (responsive design)", () => {
@@ -30,7 +31,8 @@ describe("HTML pages", () => {
       const html = fs.readFileSync(path.join(PUBLIC, page), "utf8");
       const refs = [...html.matchAll(/(?:href|src)="([^"#:]+)"/g)].map((m) => m[1]).filter((r) => !r.startsWith("tel"));
       for (const ref of refs) {
-        const file = path.join(PUBLIC, ref.replace(/^\//, ""));
+        const target = TOUR_ALIASES.includes(ref) ? "step1.html" : ref;
+        const file = path.join(PUBLIC, target.replace(/^\//, ""));
         assert.ok(fs.existsSync(file), `${page} links to missing ${ref}`);
       }
     }

@@ -163,14 +163,21 @@ function createStore(db, cipher, now) {
     reorder(userId, ids) {
       return inTx(async (tx) => {
         const rows = await tx.all(`SELECT id FROM contacts WHERE user_id = $1`, [userId]);
-        const validIds = new Set(rows.map((r) => r.id));
-        const filtered = ids.filter((id) => validIds.has(id));
-        for (let i = 0; i < filtered.length; i++) {
-          await tx.query(`UPDATE contacts SET position = $1 WHERE id = $2 AND user_id = $3`, [i + 1, filtered[i], userId]);
+        const owned = new Set(rows.map((r) => r.id));
+        const given = new Set(ids);
+        const complete = ids.length === owned.size && given.size === ids.length && ids.every((id) => owned.has(id));
+        if (!complete) return false;
+        for (let i = 0; i < ids.length; i++) {
+          await tx.query(`UPDATE contacts SET position = $1 WHERE id = $2 AND user_id = $3`, [i + 1, ids[i], userId]);
         }
         await tx.query(`UPDATE users SET order_set = 1 WHERE id = $1`, [userId]);
         return true;
       });
+    },
+
+    async markVerified(userId, id) {
+      const r = await db.query(`UPDATE contacts SET verified = 1, updated_at = $1 WHERE id = $2 AND user_id = $3`, [now(), id, userId]);
+      return r.count;
     },
   };
 

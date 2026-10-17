@@ -8,133 +8,116 @@
   var dots = Array.prototype.slice.call(document.querySelectorAll(".dots span"));
   if (!steps.length) return;
 
-  var currentStep = parseInt(screen.getAttribute("data-tour-page") || "1", 10);
-  if (isNaN(currentStep) || currentStep < 1 || currentStep > steps.length) {
-    currentStep = 1;
+  var DURATION = 300;
+  var currentStep = stepFromUrl();
+  var cleanupTimer = null;
+  var leaving = null;
+
+  function stepFromUrl() {
+    var match = location.pathname.match(/step([1-3])(?:\.html)?$/);
+    return match ? parseInt(match[1], 10) : 1;
   }
 
-  var isTransitioning = false;
-
-  function updateDots(step) {
+  function show(step) {
+    steps.forEach(function (el, i) {
+      var active = i + 1 === step;
+      el.classList.toggle("active", active);
+      el.setAttribute("aria-hidden", active ? "false" : "true");
+    });
     dots.forEach(function (dot, i) {
       var active = i + 1 === step;
       dot.classList.toggle("on", active);
-      if (active) {
-        dot.setAttribute("aria-current", "step");
-      } else {
-        dot.removeAttribute("aria-current");
-      }
+      if (active) dot.setAttribute("aria-current", "step");
+      else dot.removeAttribute("aria-current");
     });
   }
 
-  function goToStep(targetStep, direction) {
-    if (targetStep < 1) targetStep = 1;
-    if (targetStep > steps.length) {
+  function finishLeaving() {
+    clearTimeout(cleanupTimer);
+    if (leaving) leaving.classList.remove("leaving-left", "leaving-right");
+    leaving = null;
+  }
+
+  function goToStep(target, fromHistory) {
+    if (target > steps.length) {
       location.href = "step4.html";
       return;
     }
-    if (targetStep === currentStep || isTransitioning) return;
+    if (target < 1 || target === currentStep) return;
 
-    isTransitioning = true;
-    var fromStep = currentStep;
-    var toStep = targetStep;
-    currentStep = targetStep;
+    finishLeaving();
 
-    var fromEl = steps[fromStep - 1];
-    var toEl = steps[toStep - 1];
+    var forward = target > currentStep;
+    var fromEl = steps[currentStep - 1];
+    var toEl = steps[target - 1];
+    currentStep = target;
 
-    if (!direction) {
-      direction = toStep > fromStep ? "forward" : "back";
+    if (!fromHistory) {
+      history.pushState({ step: target }, "", "step" + target + ".html");
     }
 
-    updateDots(currentStep);
-
-    try {
-      history.pushState({ step: currentStep }, "", "step" + currentStep + ".html");
-    } catch (e) {}
-
-    // Set initial position of entering element before animation
-    toEl.classList.remove("fading-out-left", "fading-out-right");
-    toEl.classList.add(direction === "forward" ? "entering-from-right" : "entering-from-left");
-
-    // Force browser style calculation
+    toEl.classList.add("no-transition", forward ? "enter-from-right" : "enter-from-left");
     void toEl.offsetWidth;
+    toEl.classList.remove("no-transition");
 
-    // Transition out previous step
-    fromEl.classList.remove("active");
-    fromEl.classList.add(direction === "forward" ? "fading-out-left" : "fading-out-right");
+    fromEl.classList.add(forward ? "leaving-left" : "leaving-right");
+    leaving = fromEl;
+    show(target);
+    toEl.classList.remove("enter-from-right", "enter-from-left");
 
-    // Transition in target step
-    toEl.classList.remove("entering-from-right", "entering-from-left");
-    toEl.classList.add("active");
-
-    setTimeout(function () {
-      fromEl.classList.remove("fading-out-left", "fading-out-right");
-      isTransitioning = false;
-    }, 300);
+    cleanupTimer = setTimeout(finishLeaving, DURATION);
   }
 
-  // Intercept Next buttons for step 1 & 2
+  show(currentStep);
+  history.replaceState({ step: currentStep }, "", location.pathname);
+
   document.querySelectorAll(".tour-next-btn").forEach(function (btn) {
     btn.addEventListener("click", function (e) {
       e.preventDefault();
-      goToStep(currentStep + 1, "forward");
+      goToStep(currentStep + 1);
     });
   });
 
-  // Dots click navigation
   dots.forEach(function (dot, i) {
     dot.addEventListener("click", function () {
-      var target = i + 1;
-      if (target !== currentStep) {
-        goToStep(target, target > currentStep ? "forward" : "back");
+      goToStep(i + 1);
+    });
+    dot.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        goToStep(i + 1);
       }
     });
   });
 
-  // Keyboard navigation
   window.addEventListener("keydown", function (e) {
-    if (e.key === "ArrowRight") {
-      goToStep(currentStep + 1, "forward");
-    } else if (e.key === "ArrowLeft") {
-      goToStep(currentStep - 1, "back");
-    }
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.key === "ArrowRight") goToStep(currentStep + 1);
+    else if (e.key === "ArrowLeft") goToStep(currentStep - 1);
   });
 
-  // Handle browser back and forward
-  window.addEventListener("popstate", function (e) {
-    var match = location.pathname.match(/step([1-3])\.html/);
-    var target = match ? parseInt(match[1], 10) : (e.state && e.state.step ? e.state.step : 1);
-    if (target !== currentStep) {
-      goToStep(target, target > currentStep ? "forward" : "back");
-    }
+  window.addEventListener("popstate", function () {
+    goToStep(stepFromUrl(), true);
   });
 
-  // Smooth swipe gestures on mobile
   var startX = 0;
   var startY = 0;
-  var isSwiping = false;
+  var tracking = false;
 
-  document.addEventListener("touchstart", function (e) {
+  screen.addEventListener("touchstart", function (e) {
     if (e.touches.length !== 1) return;
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
-    isSwiping = true;
+    tracking = true;
   }, { passive: true });
 
-  document.addEventListener("touchend", function (e) {
-    if (!isSwiping || e.changedTouches.length !== 1) return;
-    isSwiping = false;
+  screen.addEventListener("touchend", function (e) {
+    if (!tracking || e.changedTouches.length !== 1) return;
+    tracking = false;
     var dx = e.changedTouches[0].clientX - startX;
     var dy = e.changedTouches[0].clientY - startY;
-
-    // Must be predominantly horizontal swipe with at least 45px distance
     if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 45) {
-      if (dx < 0) {
-        goToStep(currentStep + 1, "forward");
-      } else {
-        goToStep(currentStep - 1, "back");
-      }
+      goToStep(currentStep + (dx < 0 ? 1 : -1));
     }
   }, { passive: true });
 })();

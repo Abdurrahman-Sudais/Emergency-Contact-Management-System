@@ -46,6 +46,9 @@ function createApp({ db, dataKey, now = Date.now, forceHttps = false, trustProxy
     next();
   });
 
+  app.get(["/step2.html", "/step3.html", "/step2", "/step3"], (req, res) => {
+    res.sendFile(path.join(PUBLIC_DIR, "step1.html"));
+  });
   app.use(express.static(PUBLIC_DIR, { extensions: ["html"], maxAge: 0 }));
 
   const api = express.Router();

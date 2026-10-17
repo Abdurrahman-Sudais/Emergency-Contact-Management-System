@@ -60,7 +60,14 @@
 
     if (state.filter === "review" && contacts.length) {
       list.appendChild(el("div", { className: "filter-hint" }, [
-        "Confirm the phone number is active, then tap \"Verify number\" to mark it verified."
+        "Call each number to check it works, then tap \"Verify\"."
+      ]));
+    }
+
+    var canDrag = !state.q && state.filter === "all" && contacts.length > 1;
+    if (contacts.length > 1 && !canDrag) {
+      list.appendChild(el("div", { className: "filter-hint" }, [
+        "Clear the search and filters to drag contacts into a new order."
       ]));
     }
 
@@ -87,7 +94,7 @@
         if (down) down.disabled = index === rows.length - 1;
       });
 
-      if (!ids.length) return;
+      if (ids.length !== state.total) return load();
       InCase.api("POST", "/api/contacts/reorder", { ids: ids }).then(function () {
         message("Call priority order updated.");
       }).catch(function (err) {
@@ -101,6 +108,7 @@
 
       var dragHandle = el("span", {
         className: "drag-handle",
+        hidden: !canDrag,
         title: "Drag to reorder call priority",
         "aria-label": "Drag " + c.name + " to reorder",
       }, [
@@ -141,18 +149,15 @@
         verifyEl = el("button", {
           type: "button",
           className: "badge badge-verify",
-          title: "Tap to verify " + c.name + "'s phone number",
+          title: "Mark " + c.name + "'s number as checked",
           "aria-label": "Verify " + c.name + "'s number",
-        }, [
-          el("img", { src: "images/check.png", alt: "" }),
-          " Verify number"
-        ]);
+        }, ["Needs review · Verify"]);
         verifyEl.addEventListener("click", function () { verifyContact(c); });
       }
 
       var row = el("div", {
-        className: "list-row draggable-row",
-        draggable: "true",
+        className: "list-row" + (canDrag ? " draggable-row" : ""),
+        draggable: canDrag,
         dataset: { id: String(c.id) },
       }, [
         dragHandle,
@@ -171,7 +176,11 @@
         ]),
       ]);
 
-      // HTML5 Drag and drop
+      if (!canDrag) {
+        list.appendChild(row);
+        return;
+      }
+
       row.addEventListener("dragstart", function (e) {
         draggedEl = row;
         row.classList.add("dragging");
@@ -216,7 +225,6 @@
         saveNewOrder();
       });
 
-      // Mobile touch drag handle
       dragHandle.addEventListener("touchstart", function (e) {
         if (e.touches.length !== 1) return;
         touchDraggingEl = row;
@@ -265,16 +273,10 @@
   }
 
   function verifyContact(c) {
-    var updated = {
-      name: c.name,
-      phone: c.phone,
-      relationship: c.relationship,
-      label: c.label || "",
-      note: c.note || "",
-      verified: true
-    };
-    InCase.api("PUT", "/api/contacts/" + c.id, updated).then(function () {
-      message("✓ " + c.name + " marked as verified!");
+    var question = "Have you called " + c.name + " on " + V.formatPhone(c.phone) + " and confirmed the number works?";
+    if (!confirm(question)) return;
+    InCase.api("POST", "/api/contacts/" + c.id + "/verify", {}).then(function () {
+      message(c.name + " marked as verified.");
       load();
     }).catch(function (err) { message(err.message); });
   }

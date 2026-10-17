@@ -8,18 +8,17 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="screen light tour" data-tour-page="1">
+    <div class="screen light tour">
         <header>
             <div class="dots">
-                <span class="on" role="button" aria-label="Step 1 of 3" aria-current="step"></span>
-                <span role="button" aria-label="Step 2 of 3"></span>
-                <span role="button" aria-label="Step 3 of 3"></span>
+                <span class="on" role="button" tabindex="0" aria-label="Step 1 of 3" aria-current="step"></span>
+                <span role="button" tabindex="0" aria-label="Step 2 of 3"></span>
+                <span role="button" tabindex="0" aria-label="Step 3 of 3"></span>
             </div>
             <a href="step4.html" class="skip">Skip</a>
         </header>
 
         <div class="tour-steps-container">
-            <!-- Step 1 -->
             <div class="tour-step active" data-step="1">
                 <div class="cards">
                     <div class="card"><b class="num on">1</b><div>Tunde<br><small>Brother</small></div></div>
@@ -32,8 +31,7 @@
                 <a href="step2.html" class="next tour-next-btn">Next<img src="images/arrow-right.png" alt=""></a>
             </div>
 
-            <!-- Step 2 -->
-            <div class="tour-step" data-step="2">
+            <div class="tour-step" data-step="2" aria-hidden="true">
                 <div class="lock">
                     <img src="images/lock.png" alt="">
                     <span class="tag only">Only you</span>
@@ -41,24 +39,22 @@
                 </div>
 
                 <h2>Your circle stays private.</h2>
-                <p>Contacts are encrypted and only you see them. You choose what a responder can read.</p>
+                <p>Only you can see your contacts. Your notes and medical details are encrypted.</p>
                 <a href="step3.html" class="next tour-next-btn">Next<img src="images/arrow-right.png" alt=""></a>
             </div>
 
-            <!-- Step 3 -->
-            <div class="tour-step" data-step="3">
+            <div class="tour-step" data-step="3" aria-hidden="true">
                 <div class="emergency">
-                    <p class="label">EMERGENCY MODE</p>
+                    <p class="label">YOUR HOME SCREEN</p>
                     <h3>Call Tunde</h3>
-                    <a href="#" class="call-btn"><img src="images/phone.png" alt="">Call now</a>
+                    <span class="call-btn"><img src="images/phone.png" alt="">Call now</span>
                     <div class="pills">
-                        <span class="pill"><img src="images/map-pin.png" alt="">Share location</span>
                         <span class="pill">Next: Dr. Kemi</span>
                     </div>
                 </div>
 
                 <h2>One button when it counts.</h2>
-                <p>Emergency mode shows big call buttons and shares your location. Nothing else on screen.</p>
+                <p>Your first contact gets the biggest button on your home screen. One tap and the call starts.</p>
                 <a href="step4.html" class="next">Add my first contact <img src="images/arrow-right.png" alt=""></a>
             </div>
         </div>
