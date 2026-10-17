@@ -14,6 +14,7 @@ const contactJson = (c) => ({
   note: c.note,
   position: c.position,
   verified: !!c.verified,
+  verifiedAt: c.verified_at || null,
 });
 
 function contactRoutes({ store }) {

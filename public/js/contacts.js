@@ -60,7 +60,7 @@
 
     if (state.filter === "review" && contacts.length) {
       list.appendChild(el("div", { className: "filter-hint" }, [
-        "Call each number to check it works, then tap \"Verify\"."
+        "Tap \"Call to check\" to ring a number and confirm it works."
       ]));
     }
 
@@ -142,18 +142,7 @@
         el("div", { className: "order-btns" }, [upBtn, downBtn]),
       ]);
 
-      var verifyEl;
-      if (c.verified) {
-        verifyEl = el("span", { className: "badge green" }, [el("img", { src: "images/check.png", alt: "" }), " Verified"]);
-      } else {
-        verifyEl = el("button", {
-          type: "button",
-          className: "badge badge-verify",
-          title: "Mark " + c.name + "'s number as checked",
-          "aria-label": "Verify " + c.name + "'s number",
-        }, ["Needs review · Verify"]);
-        verifyEl.addEventListener("click", function () { verifyContact(c); });
-      }
+      var verifyEl = c.verified ? InCaseCallCheck.badge(c) : InCaseCallCheck.button(c, function () { drawList(state.contacts); });
 
       var row = el("div", {
         className: "list-row" + (canDrag ? " draggable-row" : ""),
@@ -165,7 +154,7 @@
         el("span", { className: "avatar" }, [InCase.initials(c.name)]),
         el("div", { className: "who" }, [
           el("b", {}, [c.name]),
-          el("small", {}, [role + " · " + V.formatPhone(c.phone)]),
+          el("small", {}, [role + " · " + V.formatPhone(c.phone).replace(/ /g, "\u00a0")]),
           c.note ? el("span", { className: "note" }, [c.note]) : null,
         ]),
         verifyEl,
@@ -175,6 +164,14 @@
           smallButton("Delete", "trash-2", function () { remove(c); }),
         ]),
       ]);
+
+      if (!c.verified && InCaseCallCheck.isPending(c)) {
+        row.appendChild(InCaseCallCheck.prompt(c, {
+          done: function (text) { message(text); load(); },
+          failed: function () { message("Check the number is right, then save it."); openEdit(c); },
+          error: message,
+        }));
+      }
 
       if (!canDrag) {
         list.appendChild(row);
@@ -272,15 +269,6 @@
     if (window.lucide) lucide.createIcons();
   }
 
-  function verifyContact(c) {
-    var question = "Have you called " + c.name + " on " + V.formatPhone(c.phone) + " and confirmed the number works?";
-    if (!confirm(question)) return;
-    InCase.api("POST", "/api/contacts/" + c.id + "/verify", {}).then(function () {
-      message(c.name + " marked as verified.");
-      load();
-    }).catch(function (err) { message(err.message); });
-  }
-
   var timer;
   $("search").addEventListener("input", function () {
     clearTimeout(timer);
@@ -320,7 +308,6 @@
     fields.phone.value = c ? V.formatPhone(c.phone) : "";
     fields.label.value = c ? c.label : "";
     fields.note.value = c ? c.note : "";
-    $("c-verified").checked = c ? c.verified : false;
     var rel = form.querySelector('input[name=rel][value="' + (c ? c.relationship : "family") + '"]');
     if (rel) rel.checked = true;
     Object.keys(fields).forEach(function (k) { InCase.showFieldError(fields[k], null); });
@@ -364,7 +351,6 @@
       label: fields.label.value,
       note: fields.note.value,
       relationship: form.querySelector("input[name=rel]:checked").value,
-      verified: $("c-verified").checked,
     };
     var request = state.editing
       ? InCase.api("PUT", "/api/contacts/" + state.editing, data)

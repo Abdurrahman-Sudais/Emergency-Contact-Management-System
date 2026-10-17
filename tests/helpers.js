@@ -7,7 +7,9 @@ async function startApp(options = {}) {
   const db = await openDatabase();
   const clock = { now: Date.UTC(2026, 9, 13, 12, 0, 0) };
   const dataKey = crypto.randomBytes(32);
-  const app = createApp({ db, dataKey, now: () => clock.now, logErrors: false, ...options });
+  const mail = [];
+  const mailer = { send: async (m) => { mail.push(m); } };
+  const app = createApp({ db, dataKey, now: () => clock.now, logErrors: false, mailer, ...options });
   const server = await new Promise((resolve) => {
     const s = app.listen(0, "127.0.0.1", () => resolve(s));
   });
@@ -16,6 +18,19 @@ async function startApp(options = {}) {
   return {
     db,
     clock,
+    mail,
+    lastCode(email) {
+      const m = [...mail].reverse().find((x) => x.to.toLowerCase() === email.toLowerCase());
+      return m ? m.code : null;
+    },
+
+    async register(b, { name = "New Person", email, password = "Password!123" }) {
+      const r = await b.post("/api/register", { name, email, password });
+      if (r.status !== 201) throw new Error(`register failed: ${r.status} ${JSON.stringify(r.json)}`);
+      const v = await b.post("/api/verify-email", { email, code: this.lastCode(email) });
+      if (v.status !== 200) throw new Error(`verify failed: ${v.status} ${JSON.stringify(v.json)}`);
+      return v;
+    },
     base,
     close: async () => {
       server.closeAllConnections();
@@ -30,7 +45,7 @@ async function startApp(options = {}) {
     async createUser({ name = "Test User", email, password = "Password!123", role = "user" }) {
       const hash = await hashPassword(password);
       const row = await db.one(
-        `INSERT INTO users (name, email, password_hash, role, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+        `INSERT INTO users (name, email, password_hash, role, created_at, email_verified) VALUES ($1, $2, $3, $4, $5, 1) RETURNING id`,
         [name, email, hash, role, clock.now]
       );
       return row.id;

@@ -98,8 +98,30 @@ The database lives on Supabase and the website runs on Vercel. A Supabase projec
 | `DATABASE_URL` | the Supabase address from step 1 |
 | `DATA_KEY` | a new key: run `npm run key` and paste what it prints |
 | `NODE_ENV` | `production` |
+| `SMTP_HOST` | `smtp.gmail.com` |
+| `SMTP_PORT` | `465` |
+| `SMTP_USER` | the Gmail address that sends the codes |
+| `SMTP_PASS` | that Gmail account's **app password** (see below) |
+| `MAIL_FROM` | `InCase <that Gmail address>` |
 
 4. Click **Deploy**. The site is live at `https://<project>.vercel.app`, with HTTPS already on.
+
+### Email codes (Gmail)
+New accounts confirm their email with a 6-digit code, so the live site must be able to send email. A free Gmail account works:
+1. Use (or create) a Gmail account for the project and turn on **2-Step Verification** (Google Account → Security).
+2. Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords), create an app password called "InCase", and copy the 16 letters.
+3. Put those into the `SMTP_*` and `MAIL_FROM` settings above. Gmail allows about 500 emails a day.
+
+On your own computer you can leave `SMTP_HOST` empty: codes are then printed in the terminal where `npm start` runs. In production the app refuses to start without email settings, because nobody could sign up.
+
+### Google sign-in (optional)
+The "Continue with Google" button only appears once these are set:
+1. Go to [console.cloud.google.com](https://console.cloud.google.com), create a project called "InCase".
+2. **APIs & Services → OAuth consent screen**: choose **External**, fill in the app name and your email, and add the scopes `openid`, `email` and `profile`.
+3. **APIs & Services → Credentials → Create credentials → OAuth client ID**: choose **Web application**. Under **Authorized redirect URIs** add
+   `https://<your-site>.vercel.app/api/auth/google/callback` (and `http://localhost:3000/api/auth/google/callback` for testing on your computer).
+4. Copy the **Client ID** and **Client secret** into Vercel as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, and set `APP_URL` to `https://<your-site>.vercel.app`.
+5. While the consent screen is in "Testing" mode, only the Google accounts you add as test users can sign in. Click **Publish app** when you're ready for everyone.
 
 ### 3. Make yourself an admin
 Sign up on the live site. Then, in Supabase → **SQL Editor**, run:

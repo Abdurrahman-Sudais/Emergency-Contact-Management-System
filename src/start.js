@@ -1,6 +1,8 @@
 const { loadConfig } = require("./config");
 const { openDatabase } = require("./db");
 const { createApp } = require("./app");
+const { createMailer } = require("./mailer");
+const { createGoogle } = require("./security/google");
 
 async function start(overrides = {}) {
   const config = loadConfig();
@@ -15,6 +17,11 @@ async function start(overrides = {}) {
     forceHttps: config.forceHttps,
     trustProxy: config.trustProxy,
     cacheAssets: config.production,
+    mailer: createMailer(config),
+    google: config.googleClientId && config.googleClientSecret
+      ? createGoogle({ clientId: config.googleClientId, clientSecret: config.googleClientSecret })
+      : null,
+    appUrl: config.appUrl,
     ...overrides,
   });
   return { app, config, db };

@@ -7,14 +7,21 @@ before(async () => (t = await startApp()));
 after(() => t.close());
 
 describe("Registration", () => {
-  test("AUTH-01 a new user can register and is signed in straight away", async () => {
+  test("AUTH-01 a new user registers, gets an emailed code, and is signed in once it's entered", async () => {
     const b = t.browser();
     const r = await b.post("/api/register", { name: "Amina Bello", email: "amina@example.com", password: "Amina!2026pw" });
     assert.equal(r.status, 201);
-    assert.equal(r.json.user.email, "amina@example.com");
-    assert.equal(r.json.user.role, "user", "new accounts are never admins");
+    assert.equal(r.json.needsVerification, true);
+    assert.equal((await b.refreshSession()).user, null, "not signed in before the email is confirmed");
+
+    const code = t.lastCode("amina@example.com");
+    assert.match(code, /^\d{6}$/);
+    const v = await b.post("/api/verify-email", { email: "amina@example.com", code });
+    assert.equal(v.status, 200);
+    assert.equal(v.json.next, "/step1.html", "first sign-in goes to the tour");
     const s = await b.refreshSession();
     assert.equal(s.user.name, "Amina Bello");
+    assert.equal(s.user.role, "user", "new accounts are never admins");
   });
 
   test("AUTH-02 the same email can't register twice (any capitalisation)", async () => {
@@ -27,7 +34,8 @@ describe("Registration", () => {
     const b = t.browser();
     const r = await b.post("/api/register", { name: "Sneaky Sam", email: "sam@example.com", password: "Sneaky!pw12", role: "admin" });
     assert.equal(r.status, 201);
-    assert.equal(r.json.user.role, "user");
+    await b.post("/api/verify-email", { email: "sam@example.com", code: t.lastCode("sam@example.com") });
+    assert.equal((await b.refreshSession()).user.role, "user");
     assert.equal((await b.get("/api/admin")).status, 403);
   });
 });

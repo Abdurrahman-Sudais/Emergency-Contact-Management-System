@@ -14,6 +14,8 @@ function eventText(e) {
     case "profile_updated": return "Profile details updated";
     case "medical_updated": return "Medical notes updated";
     case "password_changed": return "Password changed";
+    case "email_verified": return "Email confirmed";
+    case "email_changed": return "Email address changed";
     case "photo_updated": return "Profile photo changed";
     case "photo_removed": return "Profile photo removed";
     case "role_changed": return `Role changed to ${d}`;

@@ -33,31 +33,21 @@
       $("hero-call").querySelector("span").textContent = "Call " + InCase.firstName(first.name);
       var badge = $("hero-badge");
       if (first.verified) {
-        badge.className = "badge green";
-        badge.textContent = "";
-        badge.appendChild(el("img", { src: "images/check.png", alt: "" }));
-        badge.appendChild(document.createTextNode(" Verified"));
+        var checked = InCaseCallCheck.badge(first);
+        checked.id = "hero-badge";
+        badge.replaceWith(checked);
       } else {
-        var verifyBtn = el("button", {
-          type: "button",
-          id: "hero-badge",
-          className: "badge-verify hero-badge-verify",
-          title: "Mark " + first.name + "'s number as checked",
-        }, ["Needs review · Verify"]);
-        verifyBtn.addEventListener("click", function () {
-          var question = "Have you called " + first.name + " on " + InCaseValidate.formatPhone(first.phone) + " and confirmed the number works?";
-          if (!confirm(question)) return;
-          verifyBtn.disabled = true;
-          InCase.api("POST", "/api/contacts/" + first.id + "/verify", {}).then(function () {
-            verifyBtn.replaceWith(el("span", { className: "badge green", id: "hero-badge" }, [
-              el("img", { src: "images/check.png", alt: "" }), " Verified",
-            ]));
-          }).catch(function (err) {
-            verifyBtn.disabled = false;
-            alert(err.message);
-          });
-        });
-        badge.replaceWith(verifyBtn);
+        var check = InCaseCallCheck.button(first, function () { location.reload(); });
+        check.id = "hero-badge";
+        check.classList.add("hero-badge-verify");
+        badge.replaceWith(check);
+        if (InCaseCallCheck.isPending(first)) {
+          check.closest(".hero-card").appendChild(InCaseCallCheck.prompt(first, {
+            done: function () { location.reload(); },
+            failed: function () { location.href = "contacts.html"; },
+            error: function (text) { alert(text); },
+          }));
+        }
       }
 
       var list = $("side-list");

@@ -24,8 +24,21 @@ function loadConfig(env = process.env) {
     throw new Error("DATABASE_URL is missing. On Vercel the app needs the Supabase connection string.");
   }
 
+  const smtpHost = env.SMTP_HOST || null;
+  if (production && !smtpHost) {
+    throw new Error("Email isn't set up. Add SMTP_HOST, SMTP_USER, SMTP_PASS (and MAIL_FROM) so sign-up codes can be sent.");
+  }
+
   return {
     production,
+    googleClientId: env.GOOGLE_CLIENT_ID || null,
+    googleClientSecret: env.GOOGLE_CLIENT_SECRET || null,
+    appUrl: env.APP_URL ? env.APP_URL.replace(/\/+$/, "") : null,
+    smtpHost,
+    smtpPort: Number(env.SMTP_PORT) || 465,
+    smtpUser: env.SMTP_USER || "",
+    smtpPass: env.SMTP_PASS || "",
+    mailFrom: env.MAIL_FROM || (env.SMTP_USER ? `InCase <${env.SMTP_USER}>` : "InCase <no-reply@incase.local>"),
     databaseUrl,
     dbDir: env.DB_DIR || path.join("data", "pgdata"),
     dbCaCert: env.DATABASE_CA_CERT ? env.DATABASE_CA_CERT.replace(/\\n/g, "\n") : null,

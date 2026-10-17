@@ -29,7 +29,7 @@ describe("HTML pages", () => {
   test("UI-03 every linked page, script, stylesheet and image exists", () => {
     for (const page of pages) {
       const html = fs.readFileSync(path.join(PUBLIC, page), "utf8");
-      const refs = [...html.matchAll(/(?:href|src)="([^"#:]+)"/g)].map((m) => m[1]).filter((r) => !r.startsWith("tel"));
+      const refs = [...html.matchAll(/(?:href|src)="([^"#:]+)"/g)].map((m) => m[1]).filter((r) => !r.startsWith("tel") && !r.startsWith("/api/"));
       for (const ref of refs) {
         const target = TOUR_ALIASES.includes(ref) ? "step1.html" : ref;
         const file = path.join(PUBLIC, target.replace(/^\//, ""));

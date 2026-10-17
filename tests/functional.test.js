@@ -87,13 +87,16 @@ describe("Home dashboard", () => {
 });
 
 describe("Profile", () => {
-  test("FUN-08 update name, phone and email", async () => {
+  test("FUN-08 update name, phone and email (the new email is confirmed with a code)", async () => {
     const b = await t.signedIn("profile@example.com");
     const r = await b.put("/api/profile/details", { name: "New Name", phone: "0801 555 0100", email: "new@example.com" });
     assert.equal(r.status, 200);
-    const p = (await b.get("/api/profile")).json;
+    let p = (await b.get("/api/profile")).json;
     assert.equal(p.name, "New Name");
     assert.equal(p.phone, "+234 801 555 0100");
+    assert.equal(p.pendingEmail, "new@example.com");
+    await b.post("/api/profile/email/confirm", { code: t.lastCode("new@example.com") });
+    p = (await b.get("/api/profile")).json;
     assert.equal(p.email, "new@example.com");
   });
 

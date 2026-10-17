@@ -21,6 +21,25 @@ CREATE TABLE IF NOT EXISTS users (
   last_login_at    BIGINT
 );
 CREATE UNIQUE INDEX IF NOT EXISTS users_email_unique ON users (lower(email));
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE users ALTER COLUMN email_verified SET DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS pending_email TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS has_password INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS google_sub TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS users_google_sub ON users (google_sub) WHERE google_sub IS NOT NULL;
+
+CREATE TABLE IF NOT EXISTS email_codes (
+  user_id      BIGINT  NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  purpose      TEXT    NOT NULL CHECK (purpose IN ('signup', 'email_change')),
+  email        TEXT    NOT NULL,
+  code_hash    TEXT    NOT NULL,
+  attempts     INTEGER NOT NULL DEFAULT 0,
+  sent_at      BIGINT  NOT NULL,
+  expires_at   BIGINT  NOT NULL,
+  hour_started BIGINT  NOT NULL,
+  hour_sends   INTEGER NOT NULL DEFAULT 1,
+  PRIMARY KEY (user_id, purpose)
+);
 
 CREATE TABLE IF NOT EXISTS contacts (
   id           BIGINT  GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -36,6 +55,7 @@ CREATE TABLE IF NOT EXISTS contacts (
   updated_at   BIGINT  NOT NULL
 );
 CREATE INDEX IF NOT EXISTS contacts_by_user ON contacts (user_id, position);
+ALTER TABLE contacts ADD COLUMN IF NOT EXISTS verified_at BIGINT;
 
 CREATE TABLE IF NOT EXISTS sessions (
   id_hash      TEXT    PRIMARY KEY,
@@ -83,7 +103,7 @@ DO $lock$
 DECLARE t TEXT;
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
-    FOREACH t IN ARRAY ARRAY['users', 'contacts', 'sessions', 'audit_log', 'photos', 'support_requests'] LOOP
+    FOREACH t IN ARRAY ARRAY['users', 'contacts', 'sessions', 'audit_log', 'photos', 'support_requests', 'email_codes'] LOOP
       EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);
       EXECUTE format('REVOKE ALL ON %I FROM anon, authenticated', t);
     END LOOP;
@@ -127,8 +147,12 @@ async function openPostgres(url, { caCert } = {}) {
   const conn = new URL(url);
   let host = conn.hostname;
   try {
-    host = (await dns.lookup(conn.hostname, { family: 4 })).address;
-  } catch {}
+    host = (await dns.resolve4(conn.hostname))[0];
+  } catch {
+    try {
+      host = (await dns.lookup(conn.hostname, { family: 4 })).address;
+    } catch {}
+  }
   const pool = new pg.Pool({
     host,
     port: Number(conn.port) || 5432,
@@ -163,7 +187,9 @@ async function openPostgres(url, { caCert } = {}) {
 
 async function openDatabase({ url, dir, caCert } = {}) {
   const db = url ? await openPostgres(url, { caCert }) : await openPglite(dir);
-  const ready = await db.one(`SELECT to_regclass('public.support_requests') IS NOT NULL AS ok`);
+  const ready = await db.one(
+    `SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'google_sub') AS ok`
+  );
   if (!ready.ok) await db.exec(SCHEMA);
   return db;
 }

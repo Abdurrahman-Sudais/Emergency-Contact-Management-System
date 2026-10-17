@@ -51,6 +51,16 @@
                 </div>
                 <div class="field"><label for="p-email">Email</label><input id="p-email" name="email" type="email" maxlength="254" autocomplete="email">
                     <div class="error" data-error-for="p-email" hidden><img src="images/triangle-alert.png" alt=""><span></span></div></div>
+                <div class="pending-email" id="pending-email" hidden>
+                    <p>Enter the code we sent to <b id="pending-email-text"></b>. Until you do, you still sign in with your current email.</p>
+                    <div class="row">
+                        <input id="pending-code" class="code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" aria-label="Code for your new email">
+                        <button class="btn btn-small btn-dark" type="button" id="pending-confirm">Confirm</button>
+                        <button class="btn btn-small" type="button" id="pending-resend">Send a new code</button>
+                        <button class="btn btn-small" type="button" id="pending-cancel">Cancel change</button>
+                    </div>
+                    <div class="error" data-error-for="pending-code" hidden><img src="images/triangle-alert.png" alt=""><span></span></div>
+                </div>
                 <div class="flash" data-message hidden><span></span></div>
                 <button class="btn btn-dark" type="submit">Save changes</button>
             </form>

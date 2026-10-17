@@ -12,7 +12,18 @@
     said(form, Object.keys(err.fields).length ? "" : err.message, true);
   }
 
+  var hasPassword = true;
+
   function fill(p) {
+    hasPassword = p.hasPassword;
+    $("old-pw").closest(".field").hidden = !hasPassword;
+    $("password-form").querySelector("button[type=submit]").textContent = hasPassword ? "Update password" : "Set a password";
+    var delLabel = document.querySelector('label[for="del-pw"]');
+    delLabel.textContent = hasPassword ? "Your password" : "Type your email to confirm";
+    $("del-pw").type = hasPassword ? "password" : "email";
+    $("del-pw").autocomplete = hasPassword ? "current-password" : "off";
+    var delToggle = $("del-pw").parentNode.querySelector(".toggle-pw");
+    if (delToggle) delToggle.hidden = !hasPassword;
     $("profile-name").textContent = p.name;
     var joined = new Date(p.joined).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
     $("profile-meta").textContent = (p.role === "admin" ? "Admin" : "User") + " · joined " + joined;
@@ -21,6 +32,8 @@
     $("p-email").value = p.email;
     $("blood").value = p.medical.bloodGroup;
     $("allergies").value = p.medical.allergies;
+    $("pending-email").hidden = !p.pendingEmail;
+    $("pending-email-text").textContent = p.pendingEmail || "";
   }
 
   function load() {
@@ -68,13 +81,15 @@
     e.preventDefault();
     var msg = V.password($("new-pw").value);
     InCase.showFieldError($("new-pw"), msg);
-    InCase.showFieldError($("old-pw"), $("old-pw").value ? null : "Error: enter your current password.");
-    if (msg || !$("old-pw").value) return;
+    var needOld = hasPassword && !$("old-pw").value;
+    InCase.showFieldError($("old-pw"), needOld ? "Error: enter your current password." : null);
+    if (msg || needOld) return;
 
     InCase.api("PUT", "/api/profile/password", {
       currentPassword: $("old-pw").value, newPassword: $("new-pw").value,
     }).then(function (res) {
       pw.reset();
+      load();
       said(pw, res.message);
       InCase.resetSession();
     }).catch(function (err) {
@@ -93,7 +108,8 @@
   $("delete-form").addEventListener("submit", function (e) {
     e.preventDefault();
     if (!confirm("Delete your account and every contact? This can't be undone.")) return;
-    InCase.api("DELETE", "/api/profile", { password: $("del-pw").value }).then(function () {
+    var proof = hasPassword ? { password: $("del-pw").value } : { confirmEmail: $("del-pw").value };
+    InCase.api("DELETE", "/api/profile", proof).then(function () {
       location.href = "login.html?deleted=1";
     }).catch(function (err) {
       InCase.showFieldError($("del-pw"), err.message);
@@ -104,6 +120,40 @@
   var MAX_FILE = 10 * 1024 * 1024;
   var TYPES = ["image/jpeg", "image/png", "image/webp"];
   var photoInput = $("photo-input");
+
+  function pendingError(message) {
+    InCase.showFieldError($("pending-code"), message);
+  }
+
+  $("pending-code").addEventListener("input", function () {
+    $("pending-code").value = $("pending-code").value.replace(/\D/g, "").slice(0, 6);
+  });
+
+  $("pending-confirm").addEventListener("click", function () {
+    var code = $("pending-code").value;
+    if (!/^\d{6}$/.test(code)) return pendingError("Error: enter the 6-digit code from the email.");
+    InCase.api("POST", "/api/profile/email/confirm", { code: code }).then(function (res) {
+      pendingError(null);
+      $("pending-code").value = "";
+      said(details, res.message);
+      load();
+    }).catch(function (err) { pendingError(err.message); });
+  });
+
+  $("pending-resend").addEventListener("click", function () {
+    InCase.api("POST", "/api/profile/email/resend", {}).then(function (res) {
+      pendingError(null);
+      said(details, res.message);
+    }).catch(function (err) { pendingError(err.message); });
+  });
+
+  $("pending-cancel").addEventListener("click", function () {
+    InCase.api("POST", "/api/profile/email/cancel", {}).then(function (res) {
+      pendingError(null);
+      said(details, res.message);
+      load();
+    }).catch(function (err) { pendingError(err.message); });
+  });
 
   function refreshAvatars() {
     InCase.resetSession();

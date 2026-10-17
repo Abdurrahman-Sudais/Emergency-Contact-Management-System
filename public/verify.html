@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm your email - InCase</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body class="split">
+    <aside class="side orange">
+        <a href="index.html" class="brand"><span class="dot"></span>InCase</a>
+        <div class="middle">
+            <h2>One last check.</h2>
+            <ol class="steps">
+                <li>1&nbsp; Create your account</li>
+                <li><b>2&nbsp; Confirm your email</b></li>
+                <li>3&nbsp; A quick tour</li>
+                <li>4&nbsp; Add your first contact</li>
+            </ol>
+        </div>
+    </aside>
+
+    <main class="form-side">
+        <form class="form" id="verify-form" novalidate>
+            <h1>Check your email</h1>
+            <p class="muted">We sent a 6-digit code to <b id="v-email-text">your email</b>. It expires in 10 minutes.</p>
+
+            <div class="flash" id="v-notice" hidden><span></span></div>
+            <div class="error-box error" id="v-error" hidden><img src="images/triangle-alert.png" alt=""> <span></span></div>
+
+            <input type="hidden" id="v-email">
+
+            <div class="field">
+                <label for="v-code">Verification code</label>
+                <input id="v-code" class="code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" required>
+            </div>
+
+            <button type="submit" class="btn btn-dark btn-wide">Confirm email</button>
+
+            <p class="muted hint">
+                Didn't get it? Check your spam folder, or
+                <button type="button" class="link-btn" id="v-resend">send a new code</button>
+                <span id="v-timer"></span>
+            </p>
+            <p class="muted hint"><a href="signup.html">Used the wrong email? Sign up again</a></p>
+        </form>
+    </main>
+
+    <script src="js/validate.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/verify.js"></script>
+</body>
+</html>

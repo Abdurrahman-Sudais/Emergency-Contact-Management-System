@@ -2,12 +2,12 @@
 
 This plan covers the eight kinds of testing the project requires. Six are automated: run `npm test` to repeat them. Usability and responsive testing need people and devices, so they have step-by-step scripts with spaces for results.
 
-**Latest automated run: 125 tests, 125 passed, 0 failed** (Node.js 24, Windows 11).
+**Latest automated run: 148 tests, 148 passed, 0 failed** (Node.js 24, Windows 11).
 
 | Kind of testing | How | Test IDs | File |
 |---|---|---|---|
-| 1. Functional | automated | FUN-01 – FUN-16 | `tests/functional.test.js`, `tests/features.test.js` |
-| 2. Login / registration | automated | AUTH-01 – AUTH-14 | `tests/auth.test.js` |
+| 1. Functional | automated | FUN-01 – FUN-17 | `tests/functional.test.js`, `tests/features.test.js` |
+| 2. Login / registration | automated | AUTH-01 – AUTH-14, EMAIL-01 – EMAIL-12, GOOGLE-01 – GOOGLE-10 | `tests/auth.test.js`, `tests/email.test.js`, `tests/google.test.js` |
 | 3. Form validation | automated | VAL-01 – VAL-15 | `tests/validation.test.js` |
 | 4. Security | automated | SEC-01 – SEC-35, PHOTO-01 – PHOTO-12, SUP-01 – SUP-07 | `tests/security.test.js`, `tests/photo.test.js`, `tests/features.test.js`, `tests/support.test.js` |
 | 5. Usability | manual script + automated label check | USE-01 – USE-09, UI-04 | below, `tests/pages.test.js` |
@@ -54,6 +54,42 @@ Each automated test starts a fresh copy of the app with an empty in-memory Postg
 | AUTH-12 | Call private API while signed out | 401 |
 | AUTH-13 | Open public pages while signed out | Shown |
 | AUTH-14 | Open login/signup while signed in | Redirected to Home |
+
+### Email verification (one-time codes)
+
+| ID | What is tested | Expected result |
+|---|---|---|
+| AUTH-01 | Sign up, then enter the emailed code | Not signed in until the code is entered; then signed in and sent to the tour |
+| EMAIL-01 | Log in before confirming the email | Refused; a fresh code is emailed |
+| EMAIL-02 | Wrong codes | Refused; after 5 wrong codes even the right one stops working |
+| EMAIL-03 | Code older than 10 minutes | Refused |
+| EMAIL-04 | "Send a new code" | At most one email a minute and 5 an hour; the newest code works |
+| EMAIL-05 | Unknown vs. registered email | Identical answers, so emails can't be discovered |
+| EMAIL-06 | Database | Only a keyed hash of the code is stored |
+| EMAIL-07 | The email itself | Contains the code, never the password |
+| EMAIL-08 | Someone signs up with your email and never confirms | You can still sign up; their password stops working |
+| EMAIL-09 | Sign up with an already-confirmed email | Refused |
+| EMAIL-10 | Change email on Profile | Old email stays until the new one's code is entered |
+| EMAIL-11 | Cancel an email change | Email unchanged; the code stops working |
+| EMAIL-12 | Code page | Only for signed-out visitors |
+
+### Google sign-in
+
+A pretend Google answers the app's requests during tests, so forged replies can be tried safely.
+
+| ID | What is tested | Expected result |
+|---|---|---|
+| GOOGLE-01 | Start Google sign-in | Uses random state + nonce and PKCE (S256); the client secret never appears in the browser |
+| GOOGLE-02 | New Google user | Account created, already confirmed, no password; goes to the tour |
+| GOOGLE-03 | Existing confirmed account, same email | Linked; the old password still works |
+| GOOGLE-04 | Someone pre-registered your email (never confirmed) | Their password stops working once you use Google (pre-account takeover blocked) |
+| GOOGLE-05 | Reply with the wrong state | Refused, not signed in |
+| GOOGLE-06 | Reply for another app, wrong nonce, wrong issuer, unverified email, expired | All refused |
+| GOOGLE-07 | Suspended account | Refused |
+| GOOGLE-08 | Callback without the sign-in cookie | Refused |
+| GOOGLE-09 | Google-only account | Can set a password; deleting needs the email typed out |
+| GOOGLE-10 | Google not set up | Button hidden, route answers 404 |
+| FUN-17 | Call to check | Records the date; editing the name keeps it; changing the number clears it |
 
 ## 3. Form validation testing
 
@@ -201,6 +237,8 @@ Manual: open each page at each size. In Chrome, use DevTools → device toolbar,
 | RES-06 | iPad (768px) | Login/signup show only the form (side panel hidden) | |
 | RES-07 | Laptop (1280px) | Layout matches the design (two-column Home, side panel on login) | |
 | RES-08 | Phone landscape | Pages still usable | |
+| RES-09 | Contacts at 360px | Call, edit, delete, ▲▼ and "Call to check" all visible without sideways scrolling | |
+| RES-10 | Admin at 360px | Each account is a card with role, status, last sign-in and action visible | |
 
 ## 7. Error handling testing
 
@@ -248,7 +286,7 @@ Manual check: on the Contacts page, turn on a filter or type in search. The drag
 
 | ID | What is tested | Expected result |
 |---|---|---|
-| DB-01 | Tables exist | users, contacts, sessions, audit_log, photos, support_requests |
+| DB-01 | Tables exist | users, contacts, sessions, audit_log, photos, support_requests, email_codes |
 | DB-02 | Duplicate email (any case) | Rejected by the database |
 | DB-03 | Unknown role or status | Rejected (CHECK constraint) |
 | DB-04 | Plain-text password stored | Rejected: must be an Argon2id hash |

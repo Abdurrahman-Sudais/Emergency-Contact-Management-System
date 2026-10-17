@@ -37,6 +37,8 @@ const { hashPassword } = require("../src/security/passwords");
     await store.audit.log("contact_added", { actorId: amina, subjectId: amina, detail: c.name });
   }
 
+  await db.query("UPDATE users SET email_verified = 1");
+
   console.log("Demo data created:");
   console.log(`  Admin  admin@incase.test   / ${ADMIN_PW}`);
   console.log(`  User   amina@example.com   / ${USER_PW}`);

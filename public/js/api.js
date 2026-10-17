@@ -30,6 +30,7 @@ var InCase = (function () {
         var err = new Error(body.error || "Something went wrong. Please try again.");
         err.status = res.status;
         err.fields = body.fields || {};
+        err.data = body;
         throw err;
       });
     });

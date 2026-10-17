@@ -15,6 +15,15 @@
     if (params.get(key) === "1") InCase.flash(document.getElementById("notice"), notices[key]);
   });
 
+  var googleProblems = {
+    cancelled: "Google sign-in was cancelled.",
+    failed: "Error: Google sign-in didn't work. Please try again.",
+    suspended: "Error: this account is suspended. Contact an administrator.",
+  };
+  if (googleProblems[params.get("google")]) {
+    InCase.flash(errorBox, googleProblems[params.get("google")], params.get("google") !== "cancelled");
+  }
+
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     var problem = InCaseValidate.email(email.value) || (password.value ? null : "Error: enter your password.");
@@ -31,6 +40,10 @@
     }).then(function (res) {
       location.href = res.next;
     }).catch(function (err) {
+      if (err.data && err.data.needsVerification) {
+        location.href = "verify.html?email=" + encodeURIComponent(err.data.email);
+        return;
+      }
       button.disabled = false;
       password.value = "";
       password.classList.add("invalid");

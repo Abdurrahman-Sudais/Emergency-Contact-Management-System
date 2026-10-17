@@ -30,10 +30,21 @@ function createStore(db, cipher, now) {
     recordLogin: (id) => db.query(`UPDATE users SET failed_logins = 0, locked_until = NULL, last_login_at = $1 WHERE id = $2`, [now(), id]),
 
     updateDetails: (id, { name, email, phone }) => db.query(`UPDATE users SET name = $1, email = $2, phone = $3 WHERE id = $4`, [name, email, phone, id]),
-    updatePassword: (id, hash) => db.query(`UPDATE users SET password_hash = $1 WHERE id = $2`, [hash, id]),
+    updatePassword: (id, hash) => db.query(`UPDATE users SET password_hash = $1, has_password = 1 WHERE id = $2`, [hash, id]),
     setRole: (id, role) => db.query(`UPDATE users SET role = $1 WHERE id = $2`, [role, id]),
     setStatus: (id, status) => db.query(`UPDATE users SET status = $1 WHERE id = $2`, [status, id]),
     unlock: (id) => db.query(`UPDATE users SET failed_logins = 0, locked_until = NULL WHERE id = $1`, [id]),
+    restartSignup: (id, { name, passwordHash }) =>
+      db.query(`UPDATE users SET name = $1, password_hash = $2, failed_logins = 0, locked_until = NULL WHERE id = $3 AND email_verified = 0`, [name, passwordHash, id]),
+    byGoogle: (sub) => db.one(`SELECT * FROM users WHERE google_sub = $1`, [sub]),
+    linkGoogle: (id, sub) => db.query(`UPDATE users SET google_sub = $1, email_verified = 1 WHERE id = $2`, [sub, id]),
+    claimUnverified: (id, sub, passwordHash) =>
+      db.query(`UPDATE users SET google_sub = $1, password_hash = $2, email_verified = 1, has_password = 0 WHERE id = $3`, [sub, passwordHash, id]),
+    markGoogleSignup: (id, sub) => db.query(`UPDATE users SET google_sub = $1, email_verified = 1, has_password = 0 WHERE id = $2`, [sub, id]),
+    markEmailVerified: (id) => db.query(`UPDATE users SET email_verified = 1 WHERE id = $1`, [id]),
+    setPendingEmail: (id, email) => db.query(`UPDATE users SET pending_email = $1 WHERE id = $2`, [email, id]),
+    applyPendingEmail: (id) =>
+      db.query(`UPDATE users SET email = pending_email, pending_email = NULL, email_verified = 1 WHERE id = $1 AND pending_email IS NOT NULL`, [id]),
     markPrivacyReviewed: (id) => db.query(`UPDATE users SET privacy_reviewed = 1 WHERE id = $1 AND privacy_reviewed = 0`, [id]),
     remove: (id) => db.query(`DELETE FROM users WHERE id = $1`, [id]),
     adminCount: async () => (await db.one(`SELECT COUNT(*) AS n FROM users WHERE role = 'admin' AND status = 'active'`)).n,
@@ -113,8 +124,9 @@ function createStore(db, cipher, now) {
     async create(userId, c) {
       const t = now();
       const row = await db.one(
-        `INSERT INTO contacts (user_id, name, label, phone, relationship, note_enc, position, verified, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, (SELECT COALESCE(MAX(position), 0) + 1 FROM contacts WHERE user_id = $1), $7, $8, $8)
+        `INSERT INTO contacts (user_id, name, label, phone, relationship, note_enc, position, verified, verified_at, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, (SELECT COALESCE(MAX(position), 0) + 1 FROM contacts WHERE user_id = $1), $7,
+                 CASE WHEN $7 = 1 THEN $8::bigint END, $8, $8)
          RETURNING id`,
         [userId, c.name, c.label || null, c.phone, c.relationship, cipher.encrypt(c.note), c.verified ? 1 : 0, t]
       );
@@ -123,7 +135,11 @@ function createStore(db, cipher, now) {
 
     async update(userId, id, c) {
       const r = await db.query(
-        `UPDATE contacts SET name = $1, label = $2, phone = $3, relationship = $4, note_enc = $5, verified = $6, updated_at = $7
+        `UPDATE contacts SET name = $1, label = $2, phone = $3, relationship = $4, note_enc = $5,
+           verified = CASE WHEN $6 = 1 THEN 1 WHEN phone <> $3 THEN 0 ELSE verified END,
+           verified_at = CASE WHEN $6 = 1 THEN COALESCE(CASE WHEN verified = 1 THEN verified_at END, $7::bigint)
+                              WHEN phone <> $3 THEN NULL ELSE verified_at END,
+           updated_at = $7
          WHERE id = $8 AND user_id = $9`,
         [c.name, c.label || null, c.phone, c.relationship, cipher.encrypt(c.note), c.verified ? 1 : 0, now(), id, userId]
       );
@@ -176,7 +192,8 @@ function createStore(db, cipher, now) {
     },
 
     async markVerified(userId, id) {
-      const r = await db.query(`UPDATE contacts SET verified = 1, updated_at = $1 WHERE id = $2 AND user_id = $3`, [now(), id, userId]);
+      const t = now();
+      const r = await db.query(`UPDATE contacts SET verified = 1, verified_at = $1, updated_at = $1 WHERE id = $2 AND user_id = $3`, [t, id, userId]);
       return r.count;
     },
   };
@@ -222,6 +239,22 @@ function createStore(db, cipher, now) {
       (await db.query(`UPDATE support_requests SET status = 'resolved', resolved_at = $1, resolved_by = $2 WHERE id = $3 AND status = 'open'`, [now(), adminId, id])).count,
   };
 
+  const codes = {
+    get: (userId, purpose) => db.one(`SELECT * FROM email_codes WHERE user_id = $1 AND purpose = $2`, [userId, purpose]),
+    save: (userId, purpose, email, codeHash, { expiresAt, hourStarted, hourSends }) =>
+      db.query(
+        `INSERT INTO email_codes (user_id, purpose, email, code_hash, attempts, sent_at, expires_at, hour_started, hour_sends)
+         VALUES ($1, $2, $3, $4, 0, $5, $6, $7, $8)
+         ON CONFLICT (user_id, purpose) DO UPDATE SET email = excluded.email, code_hash = excluded.code_hash, attempts = 0,
+           sent_at = excluded.sent_at, expires_at = excluded.expires_at, hour_started = excluded.hour_started, hour_sends = excluded.hour_sends`,
+        [userId, purpose, email, codeHash, now(), expiresAt, hourStarted, hourSends]
+      ),
+    addAttempt: async (userId, purpose) =>
+      (await db.one(`UPDATE email_codes SET attempts = attempts + 1 WHERE user_id = $1 AND purpose = $2 RETURNING attempts`, [userId, purpose]))?.attempts ?? 0,
+    expire: (userId, purpose) => db.query(`UPDATE email_codes SET expires_at = 0 WHERE user_id = $1 AND purpose = $2`, [userId, purpose]),
+    remove: (userId, purpose) => db.query(`DELETE FROM email_codes WHERE user_id = $1 AND purpose = $2`, [userId, purpose]),
+  };
+
   const audit = {
     log: (event, { actorId = null, subjectId = null, detail = null } = {}) =>
       db.query(`INSERT INTO audit_log (actor_id, subject_id, event, detail, created_at) VALUES ($1, $2, $3, $4, $5)`, [actorId, subjectId, event, detail, now()]),
@@ -242,6 +275,7 @@ function createStore(db, cipher, now) {
     contacts,
     photos,
     support,
+    codes,
     audit,
     transaction: (fn) => inTx((tx) => fn(createStore(tx, cipher, now))),
   };

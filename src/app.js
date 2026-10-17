@@ -6,18 +6,21 @@ const { createCipher } = require("./security/encryption");
 const { createSessions } = require("./security/sessions");
 const { csrf } = require("./security/csrf");
 const { securityHeaders, noStore } = require("./security/headers");
+const { createOtp } = require("./security/otp");
+const { createMailer } = require("./mailer");
 
 const PUBLIC_DIR = path.join(__dirname, "..", "public");
 
 const PRIVATE_PAGES = ["home", "contacts", "profile", "admin", "step4"];
-const GUEST_PAGES = ["login", "signup"];
+const GUEST_PAGES = ["login", "signup", "verify"];
 
 const ASSET = /\.(css|js|png|jpe?g|svg|webp|ico|txt)$/;
 
-function createApp({ db, dataKey, now = Date.now, forceHttps = false, trustProxy = false, logErrors = true, cacheAssets = false }) {
+function createApp({ db, dataKey, now = Date.now, forceHttps = false, trustProxy = false, logErrors = true, cacheAssets = false, mailer = createMailer({}), google = null, appUrl = null }) {
   const store = createStore(db, createCipher(dataKey), now);
   const sessions = createSessions(db, now);
-  const ctx = { db, store, sessions, now };
+  const otp = createOtp({ store, mailer, dataKey, now });
+  const ctx = { db, store, sessions, now, otp, google, appUrl };
 
   const app = express();
   app.disable("x-powered-by");
@@ -72,6 +75,7 @@ function createApp({ db, dataKey, now = Date.now, forceHttps = false, trustProxy
   api.use(require("./routes/profile")(ctx));
   api.use(require("./routes/admin")(ctx));
   api.use(require("./routes/support")(ctx));
+  api.use(require("./routes/google")(ctx));
   api.use((req, res) => res.status(404).json({ error: "Not found." }));
   app.use("/api", api);
 

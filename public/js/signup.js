@@ -46,8 +46,8 @@
       name: fields.name.value,
       email: fields.email.value,
       password: fields.password.value,
-    }).then(function () {
-      location.href = "step1.html";
+    }).then(function (res) {
+      location.href = "verify.html?email=" + encodeURIComponent(res.email);
     }).catch(function (err) {
       button.disabled = false;
       Object.keys(fields).forEach(function (key) { InCase.showFieldError(fields[key], err.fields[key]); });
