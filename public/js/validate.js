@@ -2,7 +2,6 @@
   "use strict";
 
   var RELATIONSHIPS = ["family", "friend", "doctor", "neighbour", "work"];
-  var COUNTRY_CODES = ["+234", "+233", "+44", "+1"];
 
   function clean(v) {
     return String(v == null ? "" : v).trim();
@@ -65,6 +64,13 @@
     return null;
   }
 
+  function countryCode(v) {
+    var s = clean(v).replace(/\s/g, "");
+    if (!s) return "Error: add the country code, like +234.";
+    if (!/^\+?[1-9]\d{0,3}$/.test(s)) return "Error: a country code is + and 1 to 4 digits, like +234.";
+    return null;
+  }
+
   function formatPhone(s) {
     s = String(s || "");
     var m = /^\+234(\d{3})(\d{3})(\d{4})$/.exec(s);
@@ -84,7 +90,7 @@
 
   var api = {
     RELATIONSHIPS: RELATIONSHIPS,
-    COUNTRY_CODES: COUNTRY_CODES,
+    countryCode: countryCode,
     name: name,
     email: email,
     password: password,

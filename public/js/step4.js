@@ -6,14 +6,20 @@
   var phone = document.getElementById("phone");
   var country = document.getElementById("country");
 
+  function code() {
+    var c = country.value.replace(/\s/g, "");
+    return c.charAt(0) === "+" ? c : "+" + c;
+  }
+
   function fullPhone() {
     var v = phone.value.trim();
-    return v.charAt(0) === "+" ? v : country.value + v.replace(/^0/, "");
+    return v.charAt(0) === "+" ? v : code() + v.replace(/^0/, "");
   }
 
   function check() {
     var nameError = V.name(name.value);
-    var phoneError = phone.value.trim() ? V.phone(fullPhone()) : "Error: enter a phone number.";
+    var codeError = phone.value.trim().charAt(0) === "+" ? null : V.countryCode(country.value);
+    var phoneError = codeError || (phone.value.trim() ? V.phone(fullPhone()) : "Error: enter a phone number.");
     InCase.showFieldError(name, nameError);
     InCase.showFieldError(phone, phoneError);
     return !nameError && !phoneError;

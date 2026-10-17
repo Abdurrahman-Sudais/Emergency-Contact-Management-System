@@ -64,7 +64,8 @@ function createSessions(db, now) {
 
       const idHash = sha256(raw);
       const row = await db.one(
-        `SELECT s.id_hash, s.csrf_token, s.persistent, s.created_at AS session_created_at, s.last_seen_at, u.*
+        `SELECT s.id_hash, s.csrf_token, s.persistent, s.created_at AS session_created_at, s.last_seen_at, u.*,
+                (SELECT p.updated_at FROM photos p WHERE p.user_id = u.id) AS photo_version
          FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id_hash = $1`,
         [idHash]
       );

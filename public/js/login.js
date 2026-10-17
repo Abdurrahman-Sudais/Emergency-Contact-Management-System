@@ -35,6 +35,9 @@
       password.value = "";
       password.classList.add("invalid");
       InCase.flash(errorBox, err.message, true);
+      var help = document.getElementById("help-link");
+      help.href = "support.html?email=" + encodeURIComponent(email.value.trim());
+      help.classList.toggle("urgent", err.status === 403 || err.status === 423);
       password.focus();
     });
   });

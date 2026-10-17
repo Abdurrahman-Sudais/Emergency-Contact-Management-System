@@ -9,9 +9,15 @@ module.exports = function adminRoutes({ store, sessions, now }) {
   r.get("/admin", async (req, res) => {
     const q = String(req.query.q || "").trim().slice(0, 100);
     const t = now();
+    const [stats, users, events, requests] = await Promise.all([
+      store.users.stats(),
+      store.users.list(q),
+      store.audit.securityEvents(8),
+      store.support.listOpen(20),
+    ]);
     res.json({
-      stats: await store.users.stats(),
-      accounts: (await store.users.list(q)).map((u) => ({
+      stats,
+      accounts: users.map((u) => ({
         id: u.id,
         name: u.name,
         email: u.email,
@@ -20,7 +26,17 @@ module.exports = function adminRoutes({ store, sessions, now }) {
         lastLogin: u.last_login_at,
         isYou: u.id === req.user.id,
       })),
-      log: (await store.audit.securityEvents(8)).map((e) => ({
+      support: requests.map((s) => ({
+        id: s.id,
+        name: s.name,
+        email: s.email,
+        message: s.message,
+        at: s.created_at,
+        account: s.account_id
+          ? { id: s.account_id, state: s.account_status === "suspended" ? "suspended" : s.locked_until > t ? "locked" : "active" }
+          : null,
+      })),
+      log: events.map((e) => ({
         title: EVENT_TITLES[e.event] || e.event,
         who: e.subject_name || e.detail || "Deleted account",
         detail: e.event === "role_changed" ? e.detail : "",
@@ -71,6 +87,14 @@ module.exports = function adminRoutes({ store, sessions, now }) {
     await store.users.setStatus(u.id, "active");
     await log(req, "reinstated", u);
     res.json({ ok: true, message: `${u.name} is reinstated.` });
+  });
+
+  r.post("/admin/support/:id/resolve", async (req, res) => {
+    const id = parseId(req.params.id);
+    if (!id || !(await store.support.resolve(id, req.user.id))) {
+      return res.status(404).json({ error: "That request doesn't exist or is already resolved." });
+    }
+    res.json({ ok: true, message: "Request marked as resolved." });
   });
 
   r.post("/admin/users/:id/unlock", async (req, res) => {

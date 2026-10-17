@@ -2,17 +2,17 @@
 
 This plan covers the eight kinds of testing the project requires. Six are automated: run `npm test` to repeat them. Usability and responsive testing need people and devices, so they have step-by-step scripts with spaces for results.
 
-**Latest automated run: 116 tests, 116 passed, 0 failed** (Node.js 24, Windows 11).
+**Latest automated run: 125 tests, 125 passed, 0 failed** (Node.js 24, Windows 11).
 
 | Kind of testing | How | Test IDs | File |
 |---|---|---|---|
 | 1. Functional | automated | FUN-01 – FUN-16 | `tests/functional.test.js`, `tests/features.test.js` |
 | 2. Login / registration | automated | AUTH-01 – AUTH-14 | `tests/auth.test.js` |
 | 3. Form validation | automated | VAL-01 – VAL-15 | `tests/validation.test.js` |
-| 4. Security | automated | SEC-01 – SEC-35, PHOTO-01 – PHOTO-12 | `tests/security.test.js`, `tests/photo.test.js`, `tests/features.test.js` |
+| 4. Security | automated | SEC-01 – SEC-35, PHOTO-01 – PHOTO-12, SUP-01 – SUP-07 | `tests/security.test.js`, `tests/photo.test.js`, `tests/features.test.js`, `tests/support.test.js` |
 | 5. Usability | manual script + automated label check | USE-01 – USE-09, UI-04 | below, `tests/pages.test.js` |
 | 6. Responsive / mobile | manual script + automated checks | RES-01 – RES-08, UI-01, UI-06 | below, `tests/pages.test.js` |
-| 7. Error handling | automated | UI-07 – UI-11, VAL-14, VAL-15, SEC-28 | `tests/pages.test.js`, `tests/features.test.js` and others |
+| 7. Error handling | automated | UI-07 – UI-12, VAL-14, VAL-15, SEC-28 | `tests/pages.test.js`, `tests/features.test.js` and others |
 | 8. Database | automated | DB-01 – DB-13 | `tests/database.test.js` |
 
 Each automated test starts a fresh copy of the app with an empty in-memory PostgreSQL database (PGlite, the same database engine Supabase runs) and a fake clock. The clock lets tests check things like "locked for 15 minutes" without waiting. The tests talk to the app over real HTTP, the same way the pages do.
@@ -230,11 +230,25 @@ Manual: open each page at each size. In Chrome, use DevTools → device toolbar,
 
 Manual check: on the Contacts page, turn on a filter or type in search. The drag handles disappear and a hint says to clear them first. Tapping "Needs review · Verify" asks "Have you called … and confirmed the number works?" first.
 
+### Contacting an admin and country codes
+
+| ID | What is tested | Expected result |
+|---|---|---|
+| SUP-01 | A locked-out person sends a help request | Saved; admins see it with the account's status (locked / suspended / active) |
+| SUP-02 | Empty name, bad email, too-short or too-long message | Refused, one message per field |
+| SUP-03 | 4th request in an hour from the same email | Refused (spam protection); allowed again after an hour |
+| SUP-04 | A normal user tries to read or resolve requests | 403 |
+| SUP-05 | Script text in a message | Kept as plain text |
+| SUP-06 | Request without the anti-CSRF token | 403 |
+| SUP-07 | Admin marks a request resolved | It leaves the list; resolving twice gives 404 |
+| UI-12 | Login page | Links to the "Contact an admin" page |
+| VAL-16 | Country codes | Any code from +1 to +9999 accepted; letters or 5+ digits refused |
+
 ## 8. Database testing
 
 | ID | What is tested | Expected result |
 |---|---|---|
-| DB-01 | Tables exist | users, contacts, sessions, audit_log, photos |
+| DB-01 | Tables exist | users, contacts, sessions, audit_log, photos, support_requests |
 | DB-02 | Duplicate email (any case) | Rejected by the database |
 | DB-03 | Unknown role or status | Rejected (CHECK constraint) |
 | DB-04 | Plain-text password stored | Rejected: must be an Argon2id hash |

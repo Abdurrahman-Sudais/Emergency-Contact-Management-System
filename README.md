@@ -113,6 +113,14 @@ UPDATE users SET role = 'admin' WHERE lower(email) = lower('your@email.com');
 - **The free Supabase plan pauses after a week with no visitors.** Nothing is deleted: open the dashboard and click **Restore project**, then wait about a minute. Open the site a day before presenting.
 - **Stricter database encryption check (optional):** download the SSL certificate from Supabase (Project Settings → Database → SSL Configuration) and paste its contents into a `DATABASE_CA_CERT` variable. The app then verifies it is really talking to Supabase.
 
+### Speed
+- `vercel.json` runs the app in Vercel's **London** region (`lhr1`), next to the Supabase database, so each database question takes a few milliseconds instead of a trip across the Atlantic.
+- Styles, scripts and images skip the database and are cached by Vercel's CDN.
+- When running on your own computer against Supabase, each query still has to travel to London (about 0.2 seconds), so it will feel slower than the live site. For everyday local work, leave `DATABASE_URL` empty to use the built-in local database.
+
+## Help requests
+People who can't log in (locked, suspended, forgot their password) can use **Contact an admin** (`support.html`, linked from the login page). Requests appear under **Help requests** on the Admin page, with buttons to unlock or reinstate the account, reply by email, or mark the request resolved. Each email can send up to 3 requests an hour.
+
 ## Alternative: Render (paid, about $7/month)
 
 `render.yaml` is also included. On [render.com](https://render.com): **New → Blueprint** → pick the repo → **Apply**. Render runs the local PostgreSQL (PGlite) on a 1 GB disk, so Supabase isn't needed. To make an admin, open the service's **Shell** tab and run `npm run make-admin -- your@email.com`.

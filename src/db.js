@@ -65,11 +65,25 @@ CREATE TABLE IF NOT EXISTS photos (
   updated_at BIGINT  NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS support_requests (
+  id          BIGINT  GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id     BIGINT  REFERENCES users(id) ON DELETE SET NULL,
+  name        TEXT    NOT NULL CHECK (length(name) BETWEEN 2 AND 80),
+  email       TEXT    NOT NULL CHECK (length(email) <= 254),
+  message     TEXT    NOT NULL CHECK (length(message) BETWEEN 10 AND 1000),
+  status      TEXT    NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'resolved')),
+  created_at  BIGINT  NOT NULL,
+  resolved_at BIGINT,
+  resolved_by BIGINT  REFERENCES users(id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS support_by_status ON support_requests (status, created_at);
+CREATE INDEX IF NOT EXISTS support_by_email ON support_requests (lower(email), created_at);
+
 DO $lock$
 DECLARE t TEXT;
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
-    FOREACH t IN ARRAY ARRAY['users', 'contacts', 'sessions', 'audit_log', 'photos'] LOOP
+    FOREACH t IN ARRAY ARRAY['users', 'contacts', 'sessions', 'audit_log', 'photos', 'support_requests'] LOOP
       EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);
       EXECUTE format('REVOKE ALL ON %I FROM anon, authenticated', t);
     END LOOP;
@@ -106,16 +120,25 @@ async function openPglite(dir) {
   };
 }
 
-function openPostgres(url, { caCert } = {}) {
+async function openPostgres(url, { caCert } = {}) {
   const pg = require("pg");
+  const dns = require("node:dns").promises;
   pg.types.setTypeParser(20, (v) => Number(v));
   const conn = new URL(url);
-  conn.searchParams.delete("sslmode");
+  let host = conn.hostname;
+  try {
+    host = (await dns.lookup(conn.hostname, { family: 4 })).address;
+  } catch {}
   const pool = new pg.Pool({
-    connectionString: conn.toString(),
-    ssl: caCert ? { ca: caCert } : { rejectUnauthorized: false },
+    host,
+    port: Number(conn.port) || 5432,
+    user: decodeURIComponent(conn.username),
+    password: decodeURIComponent(conn.password),
+    database: conn.pathname.slice(1) || "postgres",
+    ssl: { servername: conn.hostname, ...(caCert ? { ca: caCert } : { rejectUnauthorized: false }) },
     max: 3,
-    idleTimeoutMillis: 10000,
+    idleTimeoutMillis: 60000,
+    keepAlive: true,
   });
   return {
     ...wrap(pool),
@@ -139,8 +162,9 @@ function openPostgres(url, { caCert } = {}) {
 }
 
 async function openDatabase({ url, dir, caCert } = {}) {
-  const db = url ? openPostgres(url, { caCert }) : await openPglite(dir);
-  await db.exec(SCHEMA);
+  const db = url ? await openPostgres(url, { caCert }) : await openPglite(dir);
+  const ready = await db.one(`SELECT to_regclass('public.support_requests') IS NOT NULL AS ok`);
+  if (!ready.ok) await db.exec(SCHEMA);
   return db;
 }
 

@@ -11,7 +11,8 @@ var InCase = (function () {
   }
 
   function api(method, url, data) {
-    return session().then(function (s) {
+    var ready = method === "GET" ? Promise.resolve(null) : session();
+    return ready.then(function (s) {
       var options = { method: method, credentials: "same-origin", headers: {} };
       if (method !== "GET") {
         var isFile = data instanceof Blob;

@@ -34,10 +34,11 @@ function contactRoutes({ store }) {
   r.get("/contacts", async (req, res) => {
     const q = String(req.query.q || "").trim().slice(0, 100);
     const filter = FILTERS.includes(req.query.filter) ? req.query.filter : "all";
-    res.json({
-      contacts: (await store.contacts.listForUser(req.user.id, { search: q, filter })).map(contactJson),
-      counts: await store.contacts.counts(req.user.id),
-    });
+    const [contacts, counts] = await Promise.all([
+      store.contacts.listForUser(req.user.id, { search: q, filter }),
+      store.contacts.counts(req.user.id),
+    ]);
+    res.json({ contacts: contacts.map(contactJson), counts });
   });
 
   r.post("/contacts", async (req, res) => {

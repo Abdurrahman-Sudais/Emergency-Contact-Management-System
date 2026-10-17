@@ -49,7 +49,9 @@
           if (!confirm(question)) return;
           verifyBtn.disabled = true;
           InCase.api("POST", "/api/contacts/" + first.id + "/verify", {}).then(function () {
-            location.reload();
+            verifyBtn.replaceWith(el("span", { className: "badge green", id: "hero-badge" }, [
+              el("img", { src: "images/check.png", alt: "" }), " Verified",
+            ]));
           }).catch(function (err) {
             verifyBtn.disabled = false;
             alert(err.message);

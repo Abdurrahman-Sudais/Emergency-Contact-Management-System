@@ -15,7 +15,7 @@ module.exports = function authRoutes({ store, sessions, now }) {
 
   r.get("/session", async (req, res) => {
     const user = publicUser(req.user);
-    if (user) user.photo = await store.photos.version(user.id);
+    if (user) user.photo = req.user.photo_version ?? null;
     res.json({ user, csrfToken: req.csrfToken });
   });
 

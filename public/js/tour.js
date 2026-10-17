@@ -8,7 +8,7 @@
   var dots = Array.prototype.slice.call(document.querySelectorAll(".dots span"));
   if (!steps.length) return;
 
-  var DURATION = 300;
+  var DURATION = 600;
   var currentStep = stepFromUrl();
   var cleanupTimer = null;
   var leaving = null;

@@ -273,8 +273,10 @@ form.fields {
   display: flex;
   gap: 10px;
 }
-.phone-row select {
+.phone-row select,
+.phone-row #country {
   width: 110px;
+  flex: none;
 }
 .chip-group {
   display: flex;
@@ -539,22 +541,22 @@ h2 {
   visibility: hidden;
   pointer-events: none;
   transform: none;
-  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), visibility 0s linear 0.3s;
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 0.8, 0.3, 1), visibility 0s linear 0.6s;
 }
 .tour-step.active {
   position: relative;
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), visibility 0s;
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 0.8, 0.3, 1), visibility 0s;
 }
 .tour-step.enter-from-right,
 .tour-step.leaving-right {
-  transform: translateX(48px);
+  transform: translateX(72px);
 }
 .tour-step.enter-from-left,
 .tour-step.leaving-left {
-  transform: translateX(-48px);
+  transform: translateX(-72px);
 }
 .tour-step.no-transition {
   transition: none;
@@ -655,5 +657,19 @@ h2 {
   }
   .dark p {
     font-size: 22px;
+  }
+}
+
+@view-transition {
+  navigation: auto;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.25s;
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
   }
 }

@@ -57,6 +57,39 @@
     ]);
   }
 
+  function drawSupport(requests) {
+    var list = $("support-list");
+    list.textContent = "";
+    $("support-card").hidden = !requests.length;
+    requests.forEach(function (r) {
+      var actions = [];
+      var status = "No account uses this email.";
+      if (r.account) {
+        status = "Account: " + { active: "active", locked: "locked", suspended: "suspended" }[r.account.state];
+        if (r.account.state === "locked" || r.account.state === "suspended") {
+          var fix = r.account.state === "locked" ? ["unlock", "Unlock account"] : ["reinstate", "Reinstate account"];
+          var fixBtn = el("button", { type: "button", className: "btn btn-small btn-dark" }, [fix[1]]);
+          fixBtn.addEventListener("click", function () {
+            if (!confirm(fix[1] + " for " + r.email + "? Make sure the request is genuine first.")) return;
+            act("/api/admin/users/" + r.account.id + "/" + fix[0]);
+          });
+          actions.push(fixBtn);
+        }
+      }
+      actions.push(el("a", { className: "btn btn-small", href: "mailto:" + r.email + "?subject=" + encodeURIComponent("Your InCase request") }, ["Reply by email"]));
+      var done = el("button", { type: "button", className: "btn btn-small" }, ["Mark resolved"]);
+      done.addEventListener("click", function () { act("/api/admin/support/" + r.id + "/resolve"); });
+      actions.push(done);
+
+      list.appendChild(el("li", {}, [
+        el("b", {}, [r.name]), " · " + r.email,
+        el("span", { className: "meta" }, [InCase.shortDate(r.at) + " · " + status]),
+        el("p", { className: "msg" }, [r.message]),
+        el("div", { className: "support-actions" }, actions),
+      ]));
+    });
+  }
+
   function load() {
     InCase.api("GET", "/api/admin?" + new URLSearchParams({ q: query })).then(function (data) {
       $("stat-users").textContent = data.stats.registered;
@@ -67,6 +100,8 @@
       body.textContent = "";
       if (!data.accounts.length) body.appendChild(el("tr", {}, [el("td", { colSpan: 5, className: "muted" }, ["No accounts match."])]));
       data.accounts.forEach(function (a) { body.appendChild(row(a)); });
+
+      drawSupport(data.support || []);
 
       var log = $("audit-log");
       log.textContent = "";

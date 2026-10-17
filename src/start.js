@@ -14,6 +14,7 @@ async function start(overrides = {}) {
     dataKey: config.dataKey,
     forceHttps: config.forceHttps,
     trustProxy: config.trustProxy,
+    cacheAssets: config.production,
     ...overrides,
   });
   return { app, config, db };

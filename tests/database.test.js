@@ -19,9 +19,9 @@ const newContact = (userId, name = "Contact Person") => store.contacts.create(us
 const count = async (sql, params) => (await db.one(sql, params)).n;
 
 describe("Schema rules", () => {
-  test("DB-01 the five tables exist", async () => {
+  test("DB-01 the six tables exist", async () => {
     const rows = await db.all(`SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name`);
-    assert.deepEqual(rows.map((r) => r.table_name), ["audit_log", "contacts", "photos", "sessions", "users"]);
+    assert.deepEqual(rows.map((r) => r.table_name), ["audit_log", "contacts", "photos", "sessions", "support_requests", "users"]);
   });
 
   test("DB-02 emails are unique, ignoring capitals", async () => {

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact an admin - InCase</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body class="split">
+    <aside class="side dark">
+        <a href="index.html" class="brand"><span class="dot"></span>InCase</a>
+        <div class="middle">
+            <h2>Need a hand?</h2>
+            <p>Locked out, suspended, or something not working? Send a message and an admin will get back to you by email.</p>
+        </div>
+        <span class="tag">INCASE SUPPORT</span>
+    </aside>
+
+    <main class="form-side">
+        <form class="form" id="support-form" novalidate>
+            <h1>Contact an admin</h1>
+            <p class="muted">Remembered your password? <a href="login.html"><b>Log in</b></a></p>
+
+            <div class="flash" id="support-done" hidden><span></span></div>
+            <div class="error-box error" id="support-error" hidden><span></span></div>
+
+            <div class="field">
+                <label for="s-name">Your name</label>
+                <input id="s-name" name="name" type="text" placeholder="Amina Bello" autocomplete="name" maxlength="80" required>
+                <div class="error" data-error-for="s-name" hidden><img src="images/triangle-alert.png" alt=""><span></span></div>
+            </div>
+
+            <div class="field">
+                <label for="s-email">Email on your account</label>
+                <input id="s-email" name="email" type="email" placeholder="amina@gmail.com" autocomplete="email" maxlength="254" required>
+                <div class="error" data-error-for="s-email" hidden><img src="images/triangle-alert.png" alt=""><span></span></div>
+            </div>
+
+            <div class="field">
+                <label for="s-message">What's wrong?</label>
+                <textarea id="s-message" name="message" rows="5" maxlength="1000" placeholder="e.g. My account says it is suspended and I don't know why." required></textarea>
+                <div class="error" data-error-for="s-message" hidden><img src="images/triangle-alert.png" alt=""><span></span></div>
+                <p class="muted small" id="s-count">0 / 1000</p>
+            </div>
+
+            <button type="submit" class="btn btn-dark btn-wide">Send message</button>
+            <p class="muted hint">Never include your password. An admin will never ask for it.</p>
+        </form>
+    </main>
+
+    <script src="js/validate.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/support.js"></script>
+</body>
+</html>

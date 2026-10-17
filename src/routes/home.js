@@ -8,7 +8,7 @@ module.exports = function homeRoutes({ store }) {
 
   r.get("/home", requireUser, async (req, res) => {
     const user = req.user;
-    const contacts = await store.contacts.listForUser(user.id);
+    const [contacts, events] = await Promise.all([store.contacts.listForUser(user.id), store.audit.forUser(user.id, 5)]);
     const medical = store.users.getMedical(user);
     const unverified = contacts.find((c) => !c.verified);
 
@@ -25,7 +25,7 @@ module.exports = function homeRoutes({ store }) {
     res.json({
       contacts: contacts.map(contactJson),
       readiness,
-      activity: (await store.audit.forUser(user.id, 5)).map((e) => ({ at: e.created_at, text: eventText(e) })),
+      activity: events.map((e) => ({ at: e.created_at, text: eventText(e) })),
     });
   });
 

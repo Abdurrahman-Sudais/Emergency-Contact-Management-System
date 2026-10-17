@@ -12,7 +12,9 @@ const PUBLIC_DIR = path.join(__dirname, "..", "public");
 const PRIVATE_PAGES = ["home", "contacts", "profile", "admin", "step4"];
 const GUEST_PAGES = ["login", "signup"];
 
-function createApp({ db, dataKey, now = Date.now, forceHttps = false, trustProxy = false, logErrors = true }) {
+const ASSET = /\.(css|js|png|jpe?g|svg|webp|ico|txt)$/;
+
+function createApp({ db, dataKey, now = Date.now, forceHttps = false, trustProxy = false, logErrors = true, cacheAssets = false }) {
   const store = createStore(db, createCipher(dataKey), now);
   const sessions = createSessions(db, now);
   const ctx = { db, store, sessions, now };
@@ -23,6 +25,16 @@ function createApp({ db, dataKey, now = Date.now, forceHttps = false, trustProxy
 
   app.get("/healthz", (req, res) => res.type("text").send("ok"));
   app.use(securityHeaders({ forceHttps }));
+  const assets = express.static(PUBLIC_DIR, {
+    index: false,
+    redirect: false,
+    setHeaders: (res) => res.set("Cache-Control", cacheAssets ? "public, max-age=3600, s-maxage=86400" : "no-cache"),
+  });
+  app.use((req, res, next) => {
+    if ((req.method === "GET" || req.method === "HEAD") && ASSET.test(req.path)) return assets(req, res, next);
+    next();
+  });
+
   app.use(express.json({ limit: "20kb" }));
   app.use(sessions.middleware());
 
@@ -59,6 +71,7 @@ function createApp({ db, dataKey, now = Date.now, forceHttps = false, trustProxy
   api.use(require("./routes/contacts")(ctx));
   api.use(require("./routes/profile")(ctx));
   api.use(require("./routes/admin")(ctx));
+  api.use(require("./routes/support")(ctx));
   api.use((req, res) => res.status(404).json({ error: "Not found." }));
   app.use("/api", api);
 

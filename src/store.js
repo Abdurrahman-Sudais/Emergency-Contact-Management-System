@@ -201,6 +201,27 @@ function createStore(db, cipher, now) {
     remove: async (userId) => (await db.query(`DELETE FROM photos WHERE user_id = $1`, [userId])).count,
   };
 
+  const support = {
+    async create({ userId = null, name, email, message }) {
+      const row = await db.one(
+        `INSERT INTO support_requests (user_id, name, email, message, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+        [userId, name, email, message, now()]
+      );
+      return row.id;
+    },
+    recentFrom: async (email, sinceMs) =>
+      (await db.one(`SELECT COUNT(*) AS n FROM support_requests WHERE lower(email) = lower($1) AND created_at > $2`, [email, now() - sinceMs])).n,
+    listOpen: (limit = 20) =>
+      db.all(
+        `SELECT r.id, r.name, r.email, r.message, r.created_at, u.id AS account_id, u.status AS account_status, u.locked_until
+         FROM support_requests r LEFT JOIN users u ON lower(u.email) = lower(r.email)
+         WHERE r.status = 'open' ORDER BY r.created_at DESC LIMIT $1`,
+        [limit]
+      ),
+    resolve: async (id, adminId) =>
+      (await db.query(`UPDATE support_requests SET status = 'resolved', resolved_at = $1, resolved_by = $2 WHERE id = $3 AND status = 'open'`, [now(), adminId, id])).count,
+  };
+
   const audit = {
     log: (event, { actorId = null, subjectId = null, detail = null } = {}) =>
       db.query(`INSERT INTO audit_log (actor_id, subject_id, event, detail, created_at) VALUES ($1, $2, $3, $4, $5)`, [actorId, subjectId, event, detail, now()]),
@@ -220,6 +241,7 @@ function createStore(db, cipher, now) {
     users,
     contacts,
     photos,
+    support,
     audit,
     transaction: (fn) => inTx((tx) => fn(createStore(tx, cipher, now))),
   };

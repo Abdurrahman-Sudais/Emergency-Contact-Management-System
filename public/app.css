@@ -1253,3 +1253,54 @@ a[href="admin.html"][hidden] {
   height: 64px;
   font-size: 20px;
 }
+
+@view-transition {
+  navigation: auto;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.25s;
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+.help-link {
+  margin-top: 8px;
+}
+.help-link a {
+  text-decoration: underline;
+}
+.help-link a.urgent {
+  color: var(--red);
+}
+.support-card {
+  margin-bottom: 20px;
+}
+.support-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+.support-list li {
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+.support-list .msg {
+  margin: 6px 0 10px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.support-list .meta {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+}
+.support-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}

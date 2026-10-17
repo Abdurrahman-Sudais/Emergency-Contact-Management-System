@@ -37,6 +37,12 @@
             <input type="search" id="search" placeholder="Search name or email" aria-label="Search accounts" maxlength="100" autocomplete="off">
         </form>
 
+        <section class="card support-card" id="support-card" hidden>
+            <h2>Help requests</h2>
+            <p class="muted small">Messages from people who can't get in. Check who they are before unlocking or reinstating an account.</p>
+            <ul class="support-list" id="support-list"></ul>
+        </section>
+
         <div class="admin-grid">
             <div>
                 <div class="card table-card">
@@ -63,7 +69,7 @@
         <a href="security.html"><i data-lucide="shield-check"></i>Security</a>
         <a href="admin.html" class="active"><i data-lucide="lock"></i>Admin</a>
     </nav>
-    <script src="js/lucide.min.js"></script>
+    <script src="js/icons.js"></script>
     <script src="js/validate.js"></script>
     <script src="js/api.js"></script>
     <script src="js/nav.js"></script>
