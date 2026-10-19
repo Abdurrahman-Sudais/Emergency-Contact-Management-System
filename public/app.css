@@ -1304,6 +1304,100 @@ a[href="admin.html"][hidden] {
   gap: 8px;
   flex-wrap: wrap;
 }
+.support-card h2 .count {
+  display: inline-block;
+  min-width: 24px;
+  padding: 2px 8px;
+  margin-left: 6px;
+  border-radius: 999px;
+  background: var(--red);
+  color: #fff;
+  font-size: 13px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.container.admin-page {
+  max-width: 1280px;
+}
+.admin-main,
+.admin-side {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+.admin-main .support-card {
+  margin-bottom: 0;
+}
+.admin-side {
+  position: sticky;
+  top: 20px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  align-content: start;
+}
+.reviewed-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+}
+.reviewed-list li {
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  cursor: pointer;
+  min-width: 0;
+}
+.reviewed-list li.muted {
+  cursor: default;
+}
+.reviewed-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.reviewed-head b {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.reviewed-head .badge {
+  flex-shrink: 0;
+  font-size: 12px;
+}
+.reviewed-list .meta {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.reviewed-list .msg {
+  margin: 6px 0;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.reviewed-list li.open .msg {
+  display: block;
+  white-space: pre-wrap;
+}
+.reviewed-list small {
+  display: block;
+  font-family: ui-monospace, monospace;
+  color: var(--muted);
+}
+
+@media (max-width: 800px) {
+  .admin-side {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+}
 
 .code-input {
   font-family: ui-monospace, monospace;

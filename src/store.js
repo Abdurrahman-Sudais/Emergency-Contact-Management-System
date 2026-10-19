@@ -235,6 +235,13 @@ function createStore(db, cipher, now) {
          WHERE r.status = 'open' ORDER BY r.created_at DESC LIMIT $1`,
         [limit]
       ),
+    listResolved: (limit = 15) =>
+      db.all(
+        `SELECT r.id, r.name, r.email, r.message, r.created_at, r.resolved_at, a.name AS resolver_name
+         FROM support_requests r LEFT JOIN users a ON a.id = r.resolved_by
+         WHERE r.status = 'resolved' ORDER BY r.resolved_at DESC LIMIT $1`,
+        [limit]
+      ),
     resolve: async (id, adminId) =>
       (await db.query(`UPDATE support_requests SET status = 'resolved', resolved_at = $1, resolved_by = $2 WHERE id = $3 AND status = 'open'`, [now(), adminId, id])).count,
   };

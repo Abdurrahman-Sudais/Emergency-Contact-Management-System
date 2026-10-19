@@ -61,6 +61,7 @@
     var list = $("support-list");
     list.textContent = "";
     $("support-card").hidden = !requests.length;
+    $("support-count").textContent = requests.length;
     requests.forEach(function (r) {
       var actions = [];
       var status = "No account uses this email.";
@@ -90,6 +91,35 @@
     });
   }
 
+  function drawReviewed(requests) {
+    var list = $("reviewed-list");
+    list.textContent = "";
+    if (!requests.length) list.appendChild(el("li", { className: "muted" }, ["Nothing reviewed yet."]));
+    requests.forEach(function (r) {
+      var msg = el("p", { className: "msg" }, [r.message]);
+      var item = el("li", {}, [
+        el("div", { className: "reviewed-head" }, [
+          el("b", {}, [r.name]),
+          el("span", { className: "badge green" }, [el("img", { src: "images/check.png", alt: "" }), " Resolved"]),
+        ]),
+        el("span", { className: "meta email" }, [r.email]),
+        msg,
+        el("small", {}, ["By " + r.resolvedBy + " · " + InCase.shortDate(r.resolvedAt).toUpperCase()]),
+      ]);
+      item.tabIndex = 0;
+      item.setAttribute("aria-expanded", "false");
+      function toggle() {
+        var open = item.classList.toggle("open");
+        item.setAttribute("aria-expanded", String(open));
+      }
+      item.addEventListener("click", toggle);
+      item.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
+      });
+      list.appendChild(item);
+    });
+  }
+
   function load() {
     InCase.api("GET", "/api/admin?" + new URLSearchParams({ q: query })).then(function (data) {
       $("stat-users").textContent = data.stats.registered;
@@ -102,6 +132,7 @@
       data.accounts.forEach(function (a) { body.appendChild(row(a)); });
 
       drawSupport(data.support || []);
+      drawReviewed(data.reviewed || []);
 
       var log = $("audit-log");
       log.textContent = "";

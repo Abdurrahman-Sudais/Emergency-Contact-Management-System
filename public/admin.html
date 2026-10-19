@@ -20,7 +20,7 @@
         <div class="user"><span class="avatar"></span> <span class="user-name"></span> <a href="login.html">Log out</a></div>
     </nav>
 
-    <main class="container">
+    <main class="container admin-page">
         <p class="eyebrow">Admin only</p>
         <h1>Accounts</h1>
 
@@ -37,14 +37,14 @@
             <input type="search" id="search" placeholder="Search name or email" aria-label="Search accounts" maxlength="100" autocomplete="off">
         </form>
 
-        <section class="card support-card" id="support-card" hidden>
-            <h2>Help requests</h2>
-            <p class="muted small">Messages from people who can't get in. Check who they are before unlocking or reinstating an account.</p>
-            <ul class="support-list" id="support-list"></ul>
-        </section>
-
         <div class="admin-grid">
-            <div>
+            <div class="admin-main">
+                <section class="card support-card" id="support-card" hidden>
+                    <h2>Help requests <span class="count" id="support-count"></span></h2>
+                    <p class="muted small">Messages from people who can't get in. Check who they are before unlocking or reinstating an account.</p>
+                    <ul class="support-list" id="support-list"></ul>
+                </section>
+
                 <div class="card table-card">
                     <table>
                         <thead><tr><th>USER</th><th>ROLE</th><th>STATUS</th><th>LAST IN</th><th></th></tr></thead>
@@ -55,11 +55,19 @@
                 <p class="muted small">Role and status changes apply straight away. Admins never see anyone's contacts.</p>
             </div>
 
-            <aside class="card">
-                <h2>Audit log</h2>
-                <ul class="log" id="audit-log">
-                </ul>
-            </aside>
+            <div class="admin-side">
+                <aside class="card">
+                    <h2>Reviewed requests</h2>
+                    <p class="muted small">Help requests already resolved, newest first.</p>
+                    <ul class="reviewed-list" id="reviewed-list"></ul>
+                </aside>
+
+                <aside class="card">
+                    <h2>Audit log</h2>
+                    <ul class="log" id="audit-log">
+                    </ul>
+                </aside>
+            </div>
         </div>
     </main>
     <nav class="tabbar">

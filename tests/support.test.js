@@ -76,6 +76,17 @@ describe("Contacting an admin", () => {
     assert.equal((await admin.post(`/api/admin/support/${req.id}/resolve`, {})).status, 404);
   });
 
+  test("SUP-08 resolved requests move to the reviewed list with who resolved them", async () => {
+    await ask(t.browser(), { email: "reviewed@example.com", message: "Please unlock my account." });
+    const req = (await admin.get("/api/admin")).json.support.find((s) => s.email === "reviewed@example.com");
+    assert.ok(!(await admin.get("/api/admin")).json.reviewed.some((s) => s.id === req.id));
+    await admin.post(`/api/admin/support/${req.id}/resolve`, {});
+    const done = (await admin.get("/api/admin")).json.reviewed.find((s) => s.id === req.id);
+    assert.equal(done.message, "Please unlock my account.");
+    assert.ok(done.resolvedAt >= done.at);
+    assert.ok(done.resolvedBy);
+  });
+
   test("UI-12 the login page links to the help form", async () => {
     const html = (await t.browser().get("/login.html")).text;
     assert.match(html, /href="support\.html"/);

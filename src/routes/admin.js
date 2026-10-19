@@ -9,11 +9,12 @@ module.exports = function adminRoutes({ store, sessions, now }) {
   r.get("/admin", async (req, res) => {
     const q = String(req.query.q || "").trim().slice(0, 100);
     const t = now();
-    const [stats, users, events, requests] = await Promise.all([
+    const [stats, users, events, requests, reviewed] = await Promise.all([
       store.users.stats(),
       store.users.list(q),
       store.audit.securityEvents(8),
       store.support.listOpen(20),
+      store.support.listResolved(15),
     ]);
     res.json({
       stats,
@@ -35,6 +36,15 @@ module.exports = function adminRoutes({ store, sessions, now }) {
         account: s.account_id
           ? { id: s.account_id, state: s.account_status === "suspended" ? "suspended" : s.locked_until > t ? "locked" : "active" }
           : null,
+      })),
+      reviewed: reviewed.map((s) => ({
+        id: s.id,
+        name: s.name,
+        email: s.email,
+        message: s.message,
+        at: s.created_at,
+        resolvedAt: s.resolved_at,
+        resolvedBy: s.resolver_name || "Deleted account",
       })),
       log: events.map((e) => ({
         title: EVENT_TITLES[e.event] || e.event,
