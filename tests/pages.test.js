@@ -32,7 +32,7 @@ describe("HTML pages", () => {
       const refs = [...html.matchAll(/(?:href|src)="([^"#:]+)"/g)].map((m) => m[1]).filter((r) => !r.startsWith("tel") && !r.startsWith("/api/"));
       for (const ref of refs) {
         const target = TOUR_ALIASES.includes(ref) ? "step1.html" : ref;
-        const file = path.join(PUBLIC, target.replace(/^\//, ""));
+        const file = path.join(PUBLIC, target.replace(/^\//, "").replace(/\?.*$/, ""));
         assert.ok(fs.existsSync(file), `${page} links to missing ${ref}`);
       }
     }
