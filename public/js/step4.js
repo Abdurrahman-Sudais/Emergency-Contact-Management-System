@@ -1,6 +1,6 @@
 (function () {
   "use strict";
-  var V = InCaseValidate;
+  var V = BeSafeValidate;
   var form = document.getElementById("first-contact");
   var name = document.getElementById("name");
   var phone = document.getElementById("phone");
@@ -20,20 +20,20 @@
     var nameError = V.name(name.value);
     var codeError = phone.value.trim().charAt(0) === "+" ? null : V.countryCode(country.value);
     var phoneError = codeError || (phone.value.trim() ? V.phone(fullPhone()) : "Error: enter a phone number.");
-    InCase.showFieldError(name, nameError);
-    InCase.showFieldError(phone, phoneError);
+    BeSafe.showFieldError(name, nameError);
+    BeSafe.showFieldError(phone, phoneError);
     return !nameError && !phoneError;
   }
 
-  name.addEventListener("blur", function () { if (name.value) InCase.showFieldError(name, V.name(name.value)); });
-  phone.addEventListener("blur", function () { if (phone.value) InCase.showFieldError(phone, V.phone(fullPhone())); });
+  name.addEventListener("blur", function () { if (name.value) BeSafe.showFieldError(name, V.name(name.value)); });
+  phone.addEventListener("blur", function () { if (phone.value) BeSafe.showFieldError(phone, V.phone(fullPhone())); });
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     if (!check()) return;
     var button = form.querySelector("button[type=submit]");
     button.disabled = true;
-    InCase.api("POST", "/api/contacts", {
+    BeSafe.api("POST", "/api/contacts", {
       name: name.value,
       phone: fullPhone(),
       relationship: form.querySelector("input[name=relation]:checked").value,
@@ -41,9 +41,9 @@
       location.href = "home.html";
     }).catch(function (err) {
       button.disabled = false;
-      InCase.showFieldError(name, err.fields.name);
-      InCase.showFieldError(phone, err.fields.phone);
-      InCase.flash(document.getElementById("form-error"), err.fields.name || err.fields.phone ? "" : err.message, true);
+      BeSafe.showFieldError(name, err.fields.name);
+      BeSafe.showFieldError(phone, err.fields.phone);
+      BeSafe.flash(document.getElementById("form-error"), err.fields.name || err.fields.phone ? "" : err.message, true);
     });
   });
 })();

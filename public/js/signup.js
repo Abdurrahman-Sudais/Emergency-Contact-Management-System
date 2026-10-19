@@ -1,6 +1,6 @@
 (function () {
   "use strict";
-  var V = InCaseValidate;
+  var V = BeSafeValidate;
   var form = document.getElementById("signup-form");
   var fields = {
     name: document.getElementById("name"),
@@ -20,10 +20,10 @@
 
   Object.keys(fields).forEach(function (key) {
     fields[key].addEventListener("blur", function () {
-      if (fields[key].value) InCase.showFieldError(fields[key], V[key](fields[key].value));
+      if (fields[key].value) BeSafe.showFieldError(fields[key], V[key](fields[key].value));
     });
     fields[key].addEventListener("input", function () {
-      if (fields[key].classList.contains("invalid")) InCase.showFieldError(fields[key], V[key](fields[key].value));
+      if (fields[key].classList.contains("invalid")) BeSafe.showFieldError(fields[key], V[key](fields[key].value));
     });
   });
 
@@ -32,7 +32,7 @@
     var ok = true;
     Object.keys(fields).forEach(function (key) {
       var msg = V[key](fields[key].value);
-      InCase.showFieldError(fields[key], msg);
+      BeSafe.showFieldError(fields[key], msg);
       if (msg && ok) {
         fields[key].focus();
         ok = false;
@@ -42,7 +42,7 @@
 
     var button = form.querySelector("button[type=submit]");
     button.disabled = true;
-    InCase.api("POST", "/api/register", {
+    BeSafe.api("POST", "/api/register", {
       name: fields.name.value,
       email: fields.email.value,
       password: fields.password.value,
@@ -50,7 +50,7 @@
       location.href = "verify.html?email=" + encodeURIComponent(res.email);
     }).catch(function (err) {
       button.disabled = false;
-      Object.keys(fields).forEach(function (key) { InCase.showFieldError(fields[key], err.fields[key]); });
+      Object.keys(fields).forEach(function (key) { BeSafe.showFieldError(fields[key], err.fields[key]); });
       if (!Object.keys(err.fields).length) alert(err.message);
     });
   });

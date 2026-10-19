@@ -7,8 +7,8 @@ const MAX_SENDS_PER_HOUR = 5;
 const MAX_ATTEMPTS = 5;
 
 const SUBJECTS = {
-  signup: "Your InCase verification code",
-  email_change: "Confirm your new InCase email",
+  signup: "Your BeSafe verification code",
+  email_change: "Confirm your new BeSafe email",
 };
 
 function createOtp({ store, mailer, dataKey, now }) {
@@ -43,9 +43,9 @@ function createOtp({ store, mailer, dataKey, now }) {
       subject: SUBJECTS[purpose],
       text:
         `Hi ${user.name.split(" ")[0]},\n\n` +
-        `Your InCase code is ${code}\n\n` +
+        `Your BeSafe code is ${code}\n\n` +
         `It expires in 10 minutes. If you didn't ask for this, you can ignore this email - nobody can use it without your password.\n\n` +
-        `InCase`,
+        `BeSafe`,
       code,
     });
     return { sent: true, waitSeconds: RESEND_AFTER / 1000 };

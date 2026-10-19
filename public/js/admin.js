@@ -1,11 +1,11 @@
 (function () {
   "use strict";
-  var el = InCase.el;
+  var el = BeSafe.el;
   var $ = function (id) { return document.getElementById(id); };
   var query = "";
 
   function message(text) {
-    InCase.flash($("page-message"), text);
+    BeSafe.flash($("page-message"), text);
   }
 
   function badge(state) {
@@ -15,7 +15,7 @@
   }
 
   function act(url, data) {
-    InCase.api("POST", url, data).then(function (res) {
+    BeSafe.api("POST", url, data).then(function (res) {
       message(res.message);
       load();
     }).catch(function (err) {
@@ -52,7 +52,7 @@
       el("td", {}, [el("b", {}, [a.name]), el("br"), el("span", { className: "muted" }, [a.email])]),
       el("td", {}, [role]),
       el("td", {}, [badge(a.state)]),
-      el("td", { className: "muted" }, [a.lastLogin ? InCase.shortDate(a.lastLogin) : "Never"]),
+      el("td", { className: "muted" }, [a.lastLogin ? BeSafe.shortDate(a.lastLogin) : "Never"]),
       el("td", {}, [action]),
     ]);
   }
@@ -77,14 +77,14 @@
           actions.push(fixBtn);
         }
       }
-      actions.push(el("a", { className: "btn btn-small", href: "mailto:" + r.email + "?subject=" + encodeURIComponent("Your InCase request") }, ["Reply by email"]));
+      actions.push(el("a", { className: "btn btn-small", href: "mailto:" + r.email + "?subject=" + encodeURIComponent("Your BeSafe request") }, ["Reply by email"]));
       var done = el("button", { type: "button", className: "btn btn-small" }, ["Mark resolved"]);
       done.addEventListener("click", function () { act("/api/admin/support/" + r.id + "/resolve"); });
       actions.push(done);
 
       list.appendChild(el("li", {}, [
         el("b", {}, [r.name]), " · " + r.email,
-        el("span", { className: "meta" }, [InCase.shortDate(r.at) + " · " + status]),
+        el("span", { className: "meta" }, [BeSafe.shortDate(r.at) + " · " + status]),
         el("p", { className: "msg" }, [r.message]),
         el("div", { className: "support-actions" }, actions),
       ]));
@@ -104,7 +104,7 @@
         ]),
         el("span", { className: "meta email" }, [r.email]),
         msg,
-        el("small", {}, ["By " + r.resolvedBy + " · " + InCase.shortDate(r.resolvedAt).toUpperCase()]),
+        el("small", {}, ["By " + r.resolvedBy + " · " + BeSafe.shortDate(r.resolvedAt).toUpperCase()]),
       ]);
       item.tabIndex = 0;
       item.setAttribute("aria-expanded", "false");
@@ -121,7 +121,7 @@
   }
 
   function load() {
-    InCase.api("GET", "/api/admin?" + new URLSearchParams({ q: query })).then(function (data) {
+    BeSafe.api("GET", "/api/admin?" + new URLSearchParams({ q: query })).then(function (data) {
       $("stat-users").textContent = data.stats.registered;
       $("stat-active").textContent = data.stats.activeThisWeek;
       $("stat-locked").textContent = data.stats.locked;
@@ -140,7 +140,7 @@
       data.log.forEach(function (e) {
         log.appendChild(el("li", {}, [
           el("b", {}, [e.title]), " · " + e.who + (e.detail ? " → " + e.detail : ""),
-          el("small", {}, [InCase.shortDate(e.at).toUpperCase()]),
+          el("small", {}, [BeSafe.shortDate(e.at).toUpperCase()]),
         ]));
       });
     }).catch(function (err) { message(err.message); });

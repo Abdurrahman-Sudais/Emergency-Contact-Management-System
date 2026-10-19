@@ -105,5 +105,5 @@
   };
 
   if (typeof module === "object" && module.exports) module.exports = api;
-  else root.InCaseValidate = api;
+  else root.BeSafeValidate = api;
 })(this);

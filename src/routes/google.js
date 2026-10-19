@@ -18,7 +18,7 @@ function displayName(name, email) {
   const clean = String(name || "").replace(/[^\p{L}\p{M} .'’-]/gu, "").replace(/\s+/g, " ").trim().slice(0, 80);
   if (!V.name(clean)) return clean;
   const fromEmail = email.split("@")[0].replace(/[^\p{L}]+/gu, " ").trim().slice(0, 80);
-  return V.name(fromEmail) ? "InCase User" : fromEmail;
+  return V.name(fromEmail) ? "BeSafe User" : fromEmail;
 }
 
 module.exports = function googleRoutes({ store, sessions, google, appUrl }) {

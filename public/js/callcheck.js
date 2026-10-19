@@ -1,7 +1,7 @@
-var InCaseCallCheck = (function () {
+var BeSafeCallCheck = (function () {
   "use strict";
   var KEY = "incase-call-check";
-  var el = InCase.el;
+  var el = BeSafe.el;
 
   function read() {
     try {
@@ -55,7 +55,7 @@ var InCaseCallCheck = (function () {
 
     yes.addEventListener("click", function () {
       yes.disabled = no.disabled = true;
-      InCase.api("POST", "/api/contacts/" + c.id + "/verify", {}).then(function () {
+      BeSafe.api("POST", "/api/contacts/" + c.id + "/verify", {}).then(function () {
         write(null);
         handlers.done(c.name + "'s number is checked.");
       }).catch(function (err) {
@@ -73,7 +73,7 @@ var InCaseCallCheck = (function () {
     });
 
     box.appendChild(el("p", {}, [
-      "Did " + InCase.firstName(c.name) + " answer on " + InCaseValidate.formatPhone(c.phone) + "?",
+      "Did " + BeSafe.firstName(c.name) + " answer on " + BeSafeValidate.formatPhone(c.phone) + "?",
     ]));
     box.appendChild(el("div", { className: "call-prompt-actions" }, [yes, no, later]));
     setTimeout(function () {

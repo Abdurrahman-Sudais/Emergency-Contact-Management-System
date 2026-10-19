@@ -17,7 +17,7 @@ const { start } = require("./src/start");
   if (config.tlsKeyFile && config.tlsCertFile) {
     const options = { key: fs.readFileSync(config.tlsKeyFile), cert: fs.readFileSync(config.tlsCertFile) };
     https.createServer(options, app).listen(config.httpsPort, () => {
-      console.log(`InCase running on https://localhost:${config.httpsPort}`);
+      console.log(`BeSafe running on https://localhost:${config.httpsPort}`);
     });
     http.createServer((req, res) => {
       const host = (req.headers.host || "localhost").replace(/:\d+$/, "");
@@ -25,7 +25,7 @@ const { start } = require("./src/start");
     }).listen(config.port, () => console.log(`HTTP on port ${config.port} redirects to HTTPS`));
   } else {
     app.listen(config.port, () => {
-      console.log(`InCase running on http://localhost:${config.port}`);
+      console.log(`BeSafe running on http://localhost:${config.port}`);
       console.log(config.databaseUrl ? "Database: Supabase (DATABASE_URL)" : `Database: local PGlite in ${config.dbDir}`);
     });
   }

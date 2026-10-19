@@ -1,14 +1,14 @@
 (function () {
   "use strict";
-  var V = InCaseValidate;
+  var V = BeSafeValidate;
   var $ = function (id) { return document.getElementById(id); };
 
   function said(form, text, isError) {
-    InCase.flash(form.querySelector("[data-message]"), text, isError);
+    BeSafe.flash(form.querySelector("[data-message]"), text, isError);
   }
 
   function showServerErrors(form, err, map) {
-    Object.keys(map).forEach(function (key) { InCase.showFieldError($(map[key]), err.fields[key]); });
+    Object.keys(map).forEach(function (key) { BeSafe.showFieldError($(map[key]), err.fields[key]); });
     said(form, Object.keys(err.fields).length ? "" : err.message, true);
   }
 
@@ -37,7 +37,7 @@
   }
 
   function load() {
-    return InCase.api("GET", "/api/profile").then(fill);
+    return BeSafe.api("GET", "/api/profile").then(fill);
   }
   load();
 
@@ -49,10 +49,10 @@
       "p-email": V.email($("p-email").value),
       "p-phone": $("p-phone").value.trim() ? V.phone($("p-phone").value) : null,
     };
-    Object.keys(errors).forEach(function (id) { InCase.showFieldError($(id), errors[id]); });
+    Object.keys(errors).forEach(function (id) { BeSafe.showFieldError($(id), errors[id]); });
     if (errors["p-name"] || errors["p-email"] || errors["p-phone"]) return;
 
-    InCase.api("PUT", "/api/profile/details", {
+    BeSafe.api("PUT", "/api/profile/details", {
       name: $("p-name").value, phone: $("p-phone").value, email: $("p-email").value,
     }).then(function (res) {
       said(details, res.message);
@@ -67,7 +67,7 @@
   var medical = $("medical-form");
   medical.addEventListener("submit", function (e) {
     e.preventDefault();
-    InCase.api("PUT", "/api/profile/medical", {
+    BeSafe.api("PUT", "/api/profile/medical", {
       bloodGroup: $("blood").value, allergies: $("allergies").value,
     }).then(function (res) {
       said(medical, res.message);
@@ -80,25 +80,25 @@
   pw.addEventListener("submit", function (e) {
     e.preventDefault();
     var msg = V.password($("new-pw").value);
-    InCase.showFieldError($("new-pw"), msg);
+    BeSafe.showFieldError($("new-pw"), msg);
     var needOld = hasPassword && !$("old-pw").value;
-    InCase.showFieldError($("old-pw"), needOld ? "Error: enter your current password." : null);
+    BeSafe.showFieldError($("old-pw"), needOld ? "Error: enter your current password." : null);
     if (msg || needOld) return;
 
-    InCase.api("PUT", "/api/profile/password", {
+    BeSafe.api("PUT", "/api/profile/password", {
       currentPassword: $("old-pw").value, newPassword: $("new-pw").value,
     }).then(function (res) {
       pw.reset();
       load();
       said(pw, res.message);
-      InCase.resetSession();
+      BeSafe.resetSession();
     }).catch(function (err) {
       showServerErrors(pw, err, { currentPassword: "old-pw", newPassword: "new-pw" });
     });
   });
 
   $("logout-btn").addEventListener("click", function () {
-    InCase.api("POST", "/api/logout").finally(function () { location.href = "login.html?out=1"; });
+    BeSafe.api("POST", "/api/logout").finally(function () { location.href = "login.html?out=1"; });
   });
 
   $("delete-open").addEventListener("click", function () {
@@ -109,10 +109,10 @@
     e.preventDefault();
     if (!confirm("Delete your account and every contact? This can't be undone.")) return;
     var proof = hasPassword ? { password: $("del-pw").value } : { confirmEmail: $("del-pw").value };
-    InCase.api("DELETE", "/api/profile", proof).then(function () {
+    BeSafe.api("DELETE", "/api/profile", proof).then(function () {
       location.href = "login.html?deleted=1";
     }).catch(function (err) {
-      InCase.showFieldError($("del-pw"), err.message);
+      BeSafe.showFieldError($("del-pw"), err.message);
     });
   });
 
@@ -122,7 +122,7 @@
   var photoInput = $("photo-input");
 
   function pendingError(message) {
-    InCase.showFieldError($("pending-code"), message);
+    BeSafe.showFieldError($("pending-code"), message);
   }
 
   $("pending-code").addEventListener("input", function () {
@@ -132,7 +132,7 @@
   $("pending-confirm").addEventListener("click", function () {
     var code = $("pending-code").value;
     if (!/^\d{6}$/.test(code)) return pendingError("Error: enter the 6-digit code from the email.");
-    InCase.api("POST", "/api/profile/email/confirm", { code: code }).then(function (res) {
+    BeSafe.api("POST", "/api/profile/email/confirm", { code: code }).then(function (res) {
       pendingError(null);
       $("pending-code").value = "";
       said(details, res.message);
@@ -141,14 +141,14 @@
   });
 
   $("pending-resend").addEventListener("click", function () {
-    InCase.api("POST", "/api/profile/email/resend", {}).then(function (res) {
+    BeSafe.api("POST", "/api/profile/email/resend", {}).then(function (res) {
       pendingError(null);
       said(details, res.message);
     }).catch(function (err) { pendingError(err.message); });
   });
 
   $("pending-cancel").addEventListener("click", function () {
-    InCase.api("POST", "/api/profile/email/cancel", {}).then(function (res) {
+    BeSafe.api("POST", "/api/profile/email/cancel", {}).then(function (res) {
       pendingError(null);
       said(details, res.message);
       load();
@@ -156,16 +156,16 @@
   });
 
   function refreshAvatars() {
-    InCase.resetSession();
-    return InCase.session().then(function (s) {
-      InCase.paintAvatars(s.user);
+    BeSafe.resetSession();
+    return BeSafe.session().then(function (s) {
+      BeSafe.paintAvatars(s.user);
       $("photo-remove").hidden = !s.user.photo;
     });
   }
   refreshAvatars();
 
   function photoError(message) {
-    InCase.showFieldError(photoInput, message);
+    BeSafe.showFieldError(photoInput, message);
   }
 
   function shrink(file) {
@@ -197,7 +197,7 @@
     shrink(file).catch(function () {
       throw new Error("Error: that picture couldn't be opened. Try another one.");
     }).then(function (blob) {
-      return InCase.api("PUT", "/api/profile/photo", blob);
+      return BeSafe.api("PUT", "/api/profile/photo", blob);
     }).then(refreshAvatars).catch(function (err) {
       photoError(err.message);
     }).finally(function () {
@@ -207,7 +207,7 @@
 
   $("photo-remove").addEventListener("click", function () {
     if (!confirm("Remove your profile photo?")) return;
-    InCase.api("DELETE", "/api/profile/photo").then(refreshAvatars).catch(function (err) {
+    BeSafe.api("DELETE", "/api/profile/photo").then(refreshAvatars).catch(function (err) {
       photoError(err.message);
     });
   });

@@ -1,7 +1,7 @@
 (function () {
   "use strict";
-  var V = InCaseValidate;
-  var el = InCase.el;
+  var V = BeSafeValidate;
+  var el = BeSafe.el;
   var $ = function (id) { return document.getElementById(id); };
 
   var state = { q: "", filter: "all", editing: null, contacts: [], total: 0 };
@@ -10,14 +10,14 @@
   var fields = { name: $("c-name"), phone: $("c-phone"), label: $("c-label"), note: $("c-note") };
 
   function message(text) {
-    InCase.flash($("page-message"), text);
+    BeSafe.flash($("page-message"), text);
     clearTimeout(message.timer);
-    message.timer = setTimeout(function () { InCase.flash($("page-message"), ""); }, 3000);
+    message.timer = setTimeout(function () { BeSafe.flash($("page-message"), ""); }, 3000);
   }
 
   function load() {
     var url = "/api/contacts?" + new URLSearchParams({ q: state.q, filter: state.filter });
-    return InCase.api("GET", url).then(function (data) {
+    return BeSafe.api("GET", url).then(function (data) {
       state.contacts = data.contacts;
       state.total = data.counts.all;
       drawCounts(data.counts);
@@ -87,7 +87,7 @@
         var id = parseInt(r.getAttribute("data-id"), 10);
         if (id) ids.push(id);
         var numEl = r.querySelector(".order-col .num");
-        if (numEl) numEl.textContent = InCase.pad2(index + 1);
+        if (numEl) numEl.textContent = BeSafe.pad2(index + 1);
         var up = r.querySelector(".order-btns .order-btn:first-child");
         var down = r.querySelector(".order-btns .order-btn:last-child");
         if (up) up.disabled = index === 0;
@@ -95,7 +95,7 @@
       });
 
       if (ids.length !== state.total) return load();
-      InCase.api("POST", "/api/contacts/reorder", { ids: ids }).then(function () {
+      BeSafe.api("POST", "/api/contacts/reorder", { ids: ids }).then(function () {
         message("Call priority order updated.");
       }).catch(function (err) {
         message(err.message);
@@ -104,7 +104,7 @@
     }
 
     contacts.forEach(function (c) {
-      var role = c.label || InCase.RELATIONSHIPS[c.relationship];
+      var role = c.label || BeSafe.RELATIONSHIPS[c.relationship];
 
       var dragHandle = el("span", {
         className: "drag-handle",
@@ -138,11 +138,11 @@
       downBtn.addEventListener("click", function () { move(c, "down"); });
 
       var orderCol = el("div", { className: "order-col" }, [
-        el("span", { className: "num" }, [InCase.pad2(c.position)]),
+        el("span", { className: "num" }, [BeSafe.pad2(c.position)]),
         el("div", { className: "order-btns" }, [upBtn, downBtn]),
       ]);
 
-      var verifyEl = c.verified ? InCaseCallCheck.badge(c) : InCaseCallCheck.button(c, function () { drawList(state.contacts); });
+      var verifyEl = c.verified ? BeSafeCallCheck.badge(c) : BeSafeCallCheck.button(c, function () { drawList(state.contacts); });
 
       var row = el("div", {
         className: "list-row" + (canDrag ? " draggable-row" : ""),
@@ -151,7 +151,7 @@
       }, [
         dragHandle,
         orderCol,
-        el("span", { className: "avatar" }, [InCase.initials(c.name)]),
+        el("span", { className: "avatar" }, [BeSafe.initials(c.name)]),
         el("div", { className: "who" }, [
           el("b", {}, [c.name]),
           el("small", {}, [role + " · " + V.formatPhone(c.phone).replace(/ /g, "\u00a0")]),
@@ -165,8 +165,8 @@
         ]),
       ]);
 
-      if (!c.verified && InCaseCallCheck.isPending(c)) {
-        row.appendChild(InCaseCallCheck.prompt(c, {
+      if (!c.verified && BeSafeCallCheck.isPending(c)) {
+        row.appendChild(BeSafeCallCheck.prompt(c, {
           done: function (text) { message(text); load(); },
           failed: function () { message("Check the number is right, then save it."); openEdit(c); },
           error: message,
@@ -287,7 +287,7 @@
   });
 
   function move(c, direction) {
-    InCase.api("POST", "/api/contacts/" + c.id + "/move", { direction: direction }).then(function () {
+    BeSafe.api("POST", "/api/contacts/" + c.id + "/move", { direction: direction }).then(function () {
       message("Call order updated.");
       load();
     }).catch(function (err) { message(err.message); });
@@ -295,7 +295,7 @@
 
   function remove(c) {
     if (!confirm("Remove " + c.name + " from your contacts?")) return;
-    InCase.api("DELETE", "/api/contacts/" + c.id).then(function () {
+    BeSafe.api("DELETE", "/api/contacts/" + c.id).then(function () {
       message(c.name + " removed.");
       load();
     }).catch(function (err) { message(err.message); });
@@ -310,8 +310,8 @@
     fields.note.value = c ? c.note : "";
     var rel = form.querySelector('input[name=rel][value="' + (c ? c.relationship : "family") + '"]');
     if (rel) rel.checked = true;
-    Object.keys(fields).forEach(function (k) { InCase.showFieldError(fields[k], null); });
-    InCase.flash($("drawer-error"), "", true);
+    Object.keys(fields).forEach(function (k) { BeSafe.showFieldError(fields[k], null); });
+    BeSafe.flash($("drawer-error"), "", true);
   }
 
   function openEdit(c) {
@@ -328,10 +328,10 @@
   var rules = { name: V.name, phone: V.phone, label: V.label, note: V.note };
   Object.keys(rules).forEach(function (k) {
     fields[k].addEventListener("blur", function () {
-      if (fields[k].value) InCase.showFieldError(fields[k], rules[k](fields[k].value));
+      if (fields[k].value) BeSafe.showFieldError(fields[k], rules[k](fields[k].value));
     });
     fields[k].addEventListener("input", function () {
-      if (fields[k].classList.contains("invalid")) InCase.showFieldError(fields[k], rules[k](fields[k].value));
+      if (fields[k].classList.contains("invalid")) BeSafe.showFieldError(fields[k], rules[k](fields[k].value));
     });
   });
 
@@ -340,7 +340,7 @@
     var bad = null;
     Object.keys(rules).forEach(function (k) {
       var msg = rules[k](fields[k].value);
-      InCase.showFieldError(fields[k], msg);
+      BeSafe.showFieldError(fields[k], msg);
       if (msg && !bad) bad = fields[k];
     });
     if (bad) return bad.focus();
@@ -353,16 +353,16 @@
       relationship: form.querySelector("input[name=rel]:checked").value,
     };
     var request = state.editing
-      ? InCase.api("PUT", "/api/contacts/" + state.editing, data)
-      : InCase.api("POST", "/api/contacts", data);
+      ? BeSafe.api("PUT", "/api/contacts/" + state.editing, data)
+      : BeSafe.api("POST", "/api/contacts", data);
 
     request.then(function () {
       drawer.classList.remove("open");
       message(state.editing ? "Contact updated." : "Contact saved.");
       load();
     }).catch(function (err) {
-      Object.keys(fields).forEach(function (k) { InCase.showFieldError(fields[k], err.fields[k]); });
-      InCase.flash($("drawer-error"), Object.keys(err.fields).length ? "" : err.message, true);
+      Object.keys(fields).forEach(function (k) { BeSafe.showFieldError(fields[k], err.fields[k]); });
+      BeSafe.flash($("drawer-error"), Object.keys(err.fields).length ? "" : err.message, true);
     });
   });
 

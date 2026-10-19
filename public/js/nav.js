@@ -3,7 +3,7 @@
 
   if (window.lucide) lucide.createIcons();
 
-  InCase.session().then(function (s) {
+  BeSafe.session().then(function (s) {
     if (!s.user) return;
     var user = s.user;
 
@@ -12,7 +12,7 @@
       if (name) name.textContent = user.name;
     });
 
-    InCase.paintAvatars(user);
+    BeSafe.paintAvatars(user);
 
     if (user.role === "admin") {
       document.querySelectorAll(".admin-only").forEach(function (a) {
@@ -29,7 +29,7 @@
     if (!link.closest(".user")) return;
     link.addEventListener("click", function (e) {
       e.preventDefault();
-      InCase.api("POST", "/api/logout").finally(function () { location.href = "login.html?out=1"; });
+      BeSafe.api("POST", "/api/logout").finally(function () { location.href = "login.html?out=1"; });
     });
   });
 })();

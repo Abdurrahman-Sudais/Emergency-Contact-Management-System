@@ -1,12 +1,12 @@
 (function () {
   "use strict";
-  var el = InCase.el;
+  var el = BeSafe.el;
   var $ = function (id) { return document.getElementById(id); };
 
-  document.querySelectorAll(".today").forEach(function (p) { p.textContent = InCase.longDate(Date.now()); });
+  document.querySelectorAll(".today").forEach(function (p) { p.textContent = BeSafe.longDate(Date.now()); });
 
-  InCase.session().then(function (s) {
-    $("first-name").textContent = InCase.firstName(s.user.name);
+  BeSafe.session().then(function (s) {
+    $("first-name").textContent = BeSafe.firstName(s.user.name);
   });
 
   if (new URLSearchParams(location.search).get("denied") === "1") {
@@ -15,10 +15,10 @@
   }
 
   function roleOf(c) {
-    return c.label || InCase.RELATIONSHIPS[c.relationship];
+    return c.label || BeSafe.RELATIONSHIPS[c.relationship];
   }
 
-  InCase.api("GET", "/api/home").then(function (data) {
+  BeSafe.api("GET", "/api/home").then(function (data) {
     var contacts = data.contacts;
 
     if (!contacts.length) {
@@ -28,21 +28,21 @@
       $("dash-grid").hidden = false;
       var first = contacts[0];
       $("hero-name").textContent = first.name;
-      $("hero-meta").textContent = roleOf(first) + " · " + InCaseValidate.formatPhone(first.phone);
+      $("hero-meta").textContent = roleOf(first) + " · " + BeSafeValidate.formatPhone(first.phone);
       $("hero-call").href = "tel:" + first.phone;
-      $("hero-call").querySelector("span").textContent = "Call " + InCase.firstName(first.name);
+      $("hero-call").querySelector("span").textContent = "Call " + BeSafe.firstName(first.name);
       var badge = $("hero-badge");
       if (first.verified) {
-        var checked = InCaseCallCheck.badge(first);
+        var checked = BeSafeCallCheck.badge(first);
         checked.id = "hero-badge";
         badge.replaceWith(checked);
       } else {
-        var check = InCaseCallCheck.button(first, function () { location.reload(); });
+        var check = BeSafeCallCheck.button(first, function () { location.reload(); });
         check.id = "hero-badge";
         check.classList.add("hero-badge-verify");
         badge.replaceWith(check);
-        if (InCaseCallCheck.isPending(first)) {
-          check.closest(".hero-card").appendChild(InCaseCallCheck.prompt(first, {
+        if (BeSafeCallCheck.isPending(first)) {
+          check.closest(".hero-card").appendChild(BeSafeCallCheck.prompt(first, {
             done: function () { location.reload(); },
             failed: function () { location.href = "contacts.html"; },
             error: function (text) { alert(text); },
@@ -54,16 +54,16 @@
       list.textContent = "";
       contacts.slice(1, 3).forEach(function (c, i) {
         list.appendChild(el("div", { className: "card contact-row" }, [
-          el("span", { className: "num" }, [InCase.pad2(i + 2)]),
+          el("span", { className: "num" }, [BeSafe.pad2(i + 2)]),
           el("div", { className: "who" }, [el("b", {}, [c.name]), el("span", { className: "muted" }, [roleOf(c)])]),
-          el("a", { href: "tel:" + c.phone, className: "btn btn-small", "aria-label": "Call " + c.name }, [InCase.icon("phone"), " Call"]),
+          el("a", { href: "tel:" + c.phone, className: "btn btn-small", "aria-label": "Call " + c.name }, [BeSafe.icon("phone"), " Call"]),
         ]));
       });
       if (contacts.length < 3) {
         list.appendChild(el("a", { href: "contacts.html", className: "card contact-row add-row" }, [
-          el("span", { className: "num" }, [InCase.pad2(contacts.length + 1)]),
+          el("span", { className: "num" }, [BeSafe.pad2(contacts.length + 1)]),
           el("span", { className: "who muted" }, ["Add another contact"]),
-          InCase.icon("plus"),
+          BeSafe.icon("plus"),
         ]));
       } else if (contacts.length > 3) {
         list.appendChild(el("a", { href: "contacts.html", className: "more-link" }, ["See all " + contacts.length + " contacts →"]));
@@ -85,7 +85,7 @@
     activity.textContent = "";
     if (!data.activity.length) activity.appendChild(el("li", { className: "muted" }, ["Nothing yet."]));
     data.activity.forEach(function (e) {
-      activity.appendChild(el("li", {}, [el("time", {}, [InCase.shortDate(e.at)]), " " + e.text]));
+      activity.appendChild(el("li", {}, [el("time", {}, [BeSafe.shortDate(e.at)]), " " + e.text]));
     });
   }).catch(function (err) {
     alert(err.message);

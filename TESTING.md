@@ -1,4 +1,4 @@
-# InCase test plan and results
+# BeSafe test plan and results
 
 This plan covers the eight kinds of testing the project requires. Six are automated: run `npm test` to repeat them. Usability and responsive testing need people and devices, so they have step-by-step scripts with spaces for results.
 

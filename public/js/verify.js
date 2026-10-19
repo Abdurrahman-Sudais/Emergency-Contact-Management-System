@@ -44,33 +44,33 @@
     e.preventDefault();
     if (busy) return;
     if (!/^\d{6}$/.test(codeInput.value)) {
-      InCase.flash($("v-error"), "Error: enter the 6-digit code from the email.", true);
+      BeSafe.flash($("v-error"), "Error: enter the 6-digit code from the email.", true);
       return;
     }
     busy = true;
     var button = form.querySelector("button[type=submit]");
     button.disabled = true;
-    InCase.api("POST", "/api/verify-email", { email: email, code: codeInput.value }).then(function (res) {
+    BeSafe.api("POST", "/api/verify-email", { email: email, code: codeInput.value }).then(function (res) {
       location.href = res.next;
     }).catch(function (err) {
       busy = false;
       button.disabled = false;
       codeInput.value = "";
       codeInput.focus();
-      InCase.flash($("v-notice"), "");
-      InCase.flash($("v-error"), err.message, true);
+      BeSafe.flash($("v-notice"), "");
+      BeSafe.flash($("v-error"), err.message, true);
     });
   });
 
   resend.addEventListener("click", function () {
     resend.disabled = true;
-    InCase.api("POST", "/api/verify-email/resend", { email: email }).then(function (res) {
-      InCase.flash($("v-error"), "", true);
-      InCase.flash($("v-notice"), res.message);
+    BeSafe.api("POST", "/api/verify-email/resend", { email: email }).then(function (res) {
+      BeSafe.flash($("v-error"), "", true);
+      BeSafe.flash($("v-notice"), res.message);
       startTimer(res.waitSeconds || 60);
     }).catch(function (err) {
       resend.disabled = false;
-      InCase.flash($("v-error"), err.message, true);
+      BeSafe.flash($("v-error"), err.message, true);
     });
   });
 

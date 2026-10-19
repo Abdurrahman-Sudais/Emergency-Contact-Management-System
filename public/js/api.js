@@ -1,4 +1,4 @@
-var InCase = (function () {
+var BeSafe = (function () {
   "use strict";
 
   var sessionPromise = null;

@@ -1,7 +1,7 @@
 {
-  "name": "incase",
+  "name": "besafe",
   "version": "1.0.0",
-  "description": "InCase - emergency contact management web application",
+  "description": "BeSafe - emergency contact management web application",
   "private": true,
   "main": "server.js",
   "engines": {

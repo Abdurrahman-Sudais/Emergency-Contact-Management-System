@@ -38,7 +38,7 @@ function loadConfig(env = process.env) {
     smtpPort: Number(env.SMTP_PORT) || 465,
     smtpUser: env.SMTP_USER || "",
     smtpPass: env.SMTP_PASS || "",
-    mailFrom: env.MAIL_FROM || (env.SMTP_USER ? `InCase <${env.SMTP_USER}>` : "InCase <no-reply@incase.local>"),
+    mailFrom: env.MAIL_FROM || (env.SMTP_USER ? `BeSafe <${env.SMTP_USER}>` : "BeSafe <no-reply@besafe.local>"),
     databaseUrl,
     dbDir: env.DB_DIR || path.join("data", "pgdata"),
     dbCaCert: env.DATABASE_CA_CERT ? env.DATABASE_CA_CERT.replace(/\\n/g, "\n") : null,

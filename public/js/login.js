@@ -12,7 +12,7 @@
     deleted: "Your account and all your contacts have been deleted.",
   };
   Object.keys(notices).forEach(function (key) {
-    if (params.get(key) === "1") InCase.flash(document.getElementById("notice"), notices[key]);
+    if (params.get(key) === "1") BeSafe.flash(document.getElementById("notice"), notices[key]);
   });
 
   var googleProblems = {
@@ -21,19 +21,19 @@
     suspended: "Error: this account is suspended. Contact an administrator.",
   };
   if (googleProblems[params.get("google")]) {
-    InCase.flash(errorBox, googleProblems[params.get("google")], params.get("google") !== "cancelled");
+    BeSafe.flash(errorBox, googleProblems[params.get("google")], params.get("google") !== "cancelled");
   }
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();
-    var problem = InCaseValidate.email(email.value) || (password.value ? null : "Error: enter your password.");
+    var problem = BeSafeValidate.email(email.value) || (password.value ? null : "Error: enter your password.");
     if (problem) {
-      InCase.flash(errorBox, problem, true);
+      BeSafe.flash(errorBox, problem, true);
       return;
     }
     var button = form.querySelector("button[type=submit]");
     button.disabled = true;
-    InCase.api("POST", "/api/login", {
+    BeSafe.api("POST", "/api/login", {
       email: email.value,
       password: password.value,
       next: params.get("next") || "",
@@ -47,7 +47,7 @@
       button.disabled = false;
       password.value = "";
       password.classList.add("invalid");
-      InCase.flash(errorBox, err.message, true);
+      BeSafe.flash(errorBox, err.message, true);
       var help = document.getElementById("help-link");
       help.href = "support.html?email=" + encodeURIComponent(email.value.trim());
       help.classList.toggle("urgent", err.status === 403 || err.status === 423);
