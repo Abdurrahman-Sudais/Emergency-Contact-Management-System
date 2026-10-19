@@ -31,7 +31,8 @@ function createApp({ db, dataKey, now = Date.now, forceHttps = false, trustProxy
   const assets = express.static(PUBLIC_DIR, {
     index: false,
     redirect: false,
-    setHeaders: (res) => res.set("Cache-Control", cacheAssets ? "public, max-age=3600, s-maxage=86400" : "no-cache"),
+    // Scripts and styles always revalidate so a deploy reaches browsers immediately; images can be cached.
+    setHeaders: (res, file) => res.set("Cache-Control", cacheAssets && !/\.(js|css)$/.test(file) ? "public, max-age=3600, s-maxage=86400" : "no-cache"),
   });
   app.use((req, res, next) => {
     if ((req.method === "GET" || req.method === "HEAD") && ASSET.test(req.path)) return assets(req, res, next);
